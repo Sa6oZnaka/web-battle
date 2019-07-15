@@ -1,0 +1,23 @@
+{
+  "name": "web-battle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sa6oZnaka/web-battle.git"
+  },
+  "author": "Alexandar Karapenev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Sa6oZnaka/web-battle/issues"
+  },
+  "homepage": "https://github.com/Sa6oZnaka/web-battle#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
