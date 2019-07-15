@@ -1,4 +1,4 @@
-import {GameMap} from "./GameMap.js";
+import {GameMap} from "./api/GameMap.js";
 
 function setup() {
     let gameMap = new GameMap(10, 10);
