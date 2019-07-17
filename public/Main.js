@@ -1,3 +1,5 @@
+let socket = io();
+
 import {GameMap} from "./api/GameMap.js";
 
 function setup() {
