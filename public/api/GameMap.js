@@ -17,5 +17,9 @@ export class GameMap {
         return array;
     }
 
+    getField(x, y){
+        return this.map[y][x];
+    }
+
 }
 
