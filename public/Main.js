@@ -1,72 +1,75 @@
-let socket = io();
-
 import {GameMap} from "./api/GameMap.js";
 
-function setup() {
-    createCanvas(1280, 720);
-
-    console.log(gameMap.map);
-}
-
+let socket = io();
 let gameMap = new GameMap(10, 10);
 
-let r = 70,
+const r = 70,
     sizeX = r * 2,
     sizeY = Math.sqrt(3) * r;
 
-function draw() {
-    background(55);
+new p5(function (p5) {
 
-    fill(90, 43, 32);
-    stroke(77);
-    strokeWeight(2);
+    p5.preload = function () {
+        console.log("preload called!");
+    };
 
-    gameMap.map[2][3].name = "Iron";
+    p5.setup = function () {
+        p5.createCanvas(1280, 720);
 
-    for (let i = 0; i < 10; i++) {
-        for (let j = 0; j < 10; j++) {
-            if (gameMap.getField(j, i).name === "Forest") {
-                fill(90, 4, 0);
-            } else {
-                fill(0, 0, 0);
-            }
+        console.log(gameMap.map);
+    };
 
-            if (j % 2 === 0) {
-                hexagon(j * (sizeX - sizeX / 4), i * sizeY, sizeX, sizeY);
-            } else {
-                hexagon(j * (sizeX - sizeX / 4), i * sizeY + sizeY / 2, sizeX, sizeY);
+    p5.draw = function () {
+        p5.background(55);
+
+        p5.fill(90, 43, 32);
+        p5.stroke(77);
+        p5.strokeWeight(2);
+
+        gameMap.map[2][3].name = "Iron";
+
+        for (let i = 0; i < 10; i++) {
+            for (let j = 0; j < 10; j++) {
+                if (gameMap.getField(j, i).name === "Forest") {
+                    p5.fill(90, 4, 0);
+                } else {
+                    p5.fill(0, 0, 0);
+                }
+
+                if (j % 2 === 0) {
+                    hexagon(p5, j * (sizeX - sizeX / 4), i * sizeY, sizeX, sizeY);
+                } else {
+                    hexagon(p5, j * (sizeX - sizeX / 4), i * sizeY + sizeY / 2, sizeX, sizeY);
+                }
             }
         }
+    };
+
+    p5.mouseClicked = function () {
+        let retPos = getHex(p5.mouseX, p5.mouseY);
+        console.log(retPos);
+        if (retPos.x % 2 !== 0) {
+            retPos.y--;
+        }
+        if (retPos.x >= 0 && retPos.y >= 0) {
+            gameMap.map[retPos.y][retPos.x].name = "Iron";
+        }
     }
-}
 
-function hexagon(x, y, sizeX, sizeY) {
-    push();
-    translate(x, y);
-    beginShape();
-    vertex(sizeX / 4, 0);
-    vertex(sizeX - sizeX / 4, 0);
-    vertex(sizeX, sizeY / 2);
-    vertex(sizeX - sizeX / 4, sizeY);
-    vertex(sizeX / 4, sizeY);
-    vertex(0, sizeY / 2);
-    endShape(CLOSE);
-    pop();
-}
+});
 
-function mouseClicked() {
-
-    let x = Math.floor(mouseX / sizeX);
-    let y = Math.floor(mouseY / sizeY);
-
-    let retPos = getHex(mouseX, mouseY);
-    console.log(retPos);
-    if (retPos.x % 2 !== 0) {
-        retPos.y--;
-    }
-    if (retPos.x >= 0 && retPos.y >= 0) {
-        gameMap.map[retPos.y][retPos.x].name = "Iron";
-    }
+function hexagon(p5, x, y, sizeX, sizeY) {
+    p5.push();
+    p5.translate(x, y);
+    p5.beginShape();
+    p5.vertex(sizeX / 4, 0);
+    p5.vertex(sizeX - sizeX / 4, 0);
+    p5.vertex(sizeX, sizeY / 2);
+    p5.vertex(sizeX - sizeX / 4, sizeY);
+    p5.vertex(sizeX / 4, sizeY);
+    p5.vertex(0, sizeY / 2);
+    p5.endShape(p5.CLOSE);
+    p5.pop();
 }
 
 function getHex(x, y) {
@@ -106,7 +109,3 @@ function getHex(x, y) {
 
     return retPos;
 }
-
-window.setup = setup;
-window.draw = draw;
-window.onmousedown = mouseClicked;
