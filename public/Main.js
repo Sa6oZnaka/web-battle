@@ -7,10 +7,12 @@ const r = 70,
     sizeX = r * 2,
     sizeY = Math.sqrt(3) * r;
 
+var img;
+
 new p5(function (p5) {
 
     p5.preload = function () {
-        console.log("preload called!");
+        img = p5.loadImage("./assets/hex.png");
     };
 
     p5.setup = function () {
@@ -23,7 +25,7 @@ new p5(function (p5) {
         p5.background(55);
 
         p5.fill(90, 43, 32);
-        p5.stroke(77);
+        p5.stroke(0);
         p5.strokeWeight(2);
 
         gameMap.map[2][3].name = "Iron";
@@ -37,12 +39,15 @@ new p5(function (p5) {
                 }
 
                 if (j % 2 === 0) {
-                    hexagon(p5, j * (sizeX - sizeX / 4), i * sizeY, sizeX, sizeY);
+                    //hexagon(p5, j * (sizeX - sizeX / 4), i * sizeY, sizeX, sizeY);
+                    p5.image(img, j * (sizeX - sizeX / 4), i * sizeY, sizeX, sizeY);
                 } else {
-                    hexagon(p5, j * (sizeX - sizeX / 4), i * sizeY + sizeY / 2, sizeX, sizeY);
+                    //hexagon(p5, j * (sizeX - sizeX / 4), i * sizeY + sizeY / 2, sizeX, sizeY);
+                    p5.image(img, j * (sizeX - sizeX / 4), i * sizeY + sizeY / 2, sizeX, sizeY);
                 }
             }
         }
+        //p5.image(img, 0, 0, 50, 50);
     };
 
     p5.mouseClicked = function () {
