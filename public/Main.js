@@ -7,12 +7,12 @@ const r = 70,
     sizeX = r * 2,
     sizeY = Math.sqrt(3) * r;
 
-var img;
+let img;
 
 new p5(function (p5) {
 
     p5.preload = function () {
-        img = p5.loadImage("./assets/hex.png");
+        img = p5.loadImage("./assets/tree.png");
     };
 
     p5.setup = function () {
@@ -32,22 +32,19 @@ new p5(function (p5) {
 
         for (let i = 0; i < 10; i++) {
             for (let j = 0; j < 10; j++) {
-                if (gameMap.getField(j, i).name === "Forest") {
-                    p5.fill(90, 4, 0);
-                } else {
-                    p5.fill(0, 0, 0);
+
+                let additionalY = 0;
+                if(j % 2 !== 0){
+                    additionalY += sizeY / 2;
                 }
 
-                if (j % 2 === 0) {
-                    //hexagon(p5, j * (sizeX - sizeX / 4), i * sizeY, sizeX, sizeY);
-                    p5.image(img, j * (sizeX - sizeX / 4), i * sizeY, sizeX, sizeY);
-                } else {
-                    //hexagon(p5, j * (sizeX - sizeX / 4), i * sizeY + sizeY / 2, sizeX, sizeY);
-                    p5.image(img, j * (sizeX - sizeX / 4), i * sizeY + sizeY / 2, sizeX, sizeY);
+                hexagon(p5, j * (sizeX - sizeX / 4), i * sizeY + additionalY, sizeX, sizeY);
+                if(gameMap.getField(j, i).name === "Forest") {
+                    p5.image(img, j * (sizeX - sizeX / 4), i * sizeY + additionalY, sizeX, sizeY);
                 }
+
             }
         }
-        //p5.image(img, 0, 0, 50, 50);
     };
 
     p5.mouseClicked = function () {
