@@ -21,5 +21,9 @@ export class GameMap {
         return this.map[y][x];
     }
 
+    setField(x, y, owner, name){
+        this.map[y][x] = new Field(name, owner);
+    }
+
 }
 

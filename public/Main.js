@@ -18,6 +18,8 @@ new p5(function (p5) {
     p5.setup = function () {
         p5.createCanvas(1280, 720);
 
+        socket.emit('spawn', "/* IDK */");
+
         console.log(gameMap.map);
     };
 
@@ -54,6 +56,11 @@ new p5(function (p5) {
             retPos.y--;
         }
         if (retPos.x >= 0 && retPos.y >= 0) {
+            socket.emit('update', {
+                "x" : retPos.x,
+                "y" : retPos.y,
+                "type" : "Iron"
+            });
             gameMap.map[retPos.y][retPos.x].name = "Iron";
         }
     }
@@ -111,3 +118,23 @@ function getHex(x, y) {
 
     return retPos;
 }
+
+
+
+socket.on('spawn', function (data) {
+    gameMap = data;
+});
+
+socket.on('update', function (data) {
+    gameMap.setField(data.x, data.y, socket.id, "Iron");
+});
+
+socket.on('delete', function (data) {
+    //vehs.delete(data.id);
+});
+
+socket.on('init', function (data) {
+    console.warn(data.gameMap);
+    gameMap.map = data.gameMap.map;
+    console.log(gameMap);
+});
