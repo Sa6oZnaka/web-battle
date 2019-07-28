@@ -23,10 +23,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('update', function (data) {
-        //console.log("A", socket.id);
         gameMap.setField(data.x, data.y, socket.id, data.type);
-
-        // TODO setField(field)
 
         socket.broadcast.emit('update', data);
     });
