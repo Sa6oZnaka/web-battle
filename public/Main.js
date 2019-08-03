@@ -18,7 +18,8 @@ let camX = 0,
 let offSetX = 0,
     offSetY = 0;
 
-let pressed = false;
+let mousePressed = false;
+let mouseDragged = false;
 
 new p5(function (p5) {
 
@@ -63,6 +64,9 @@ new p5(function (p5) {
     };
 
     p5.mouseClicked = function () {
+        if(mouseDragged)
+            return;
+
         let retPos = hex.getHexPos(p5.mouseX - camX, p5.mouseY - camY, r);
 
         if (retPos.x % 2 !== 0) {
@@ -82,13 +86,16 @@ new p5(function (p5) {
     };
 
     p5.mousePressed = function () {
-        console.log("Pressed!");
         offSetX = p5.mouseX;
         offSetY = p5.mouseY;
-        pressed = true;
+
+        mousePressed = true;
+        mouseDragged = false;
     };
 
     p5.mouseDragged = function () {
+        mouseDragged = true;
+
         camX += (p5.mouseX - offSetX);
         camY += (p5.mouseY - offSetY);
 
@@ -97,7 +104,7 @@ new p5(function (p5) {
     };
 
     p5.mouseReleased = function () {
-        pressed = false;
+        mousePressed = false;
     }
 
 });
