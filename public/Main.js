@@ -1,9 +1,9 @@
 import {GameMap} from "./api/GameMap.js";
 import {Hex} from "./api/Hex.js";
 
-let socket = io();
-let gameMap = new GameMap(10, 10);
+const socket = io();
 
+const hex = new Hex();
 const r = 70,
     sizeX = r * 2,
     sizeY = Math.sqrt(3) * r;
@@ -11,8 +11,14 @@ const r = 70,
 let forestLayer,
     mountainLayer;
 
+let gameMap = new GameMap(10, 10);
+let camX = 0,
+    camY = 0;
 
-let hex = new Hex();
+let offSetX = 0,
+    offSetY = 0;
+
+let pressed = false;
 
 new p5(function (p5) {
 
@@ -44,12 +50,12 @@ new p5(function (p5) {
                     p5.fill(8, 62, 0);
                 }
 
-                hex.draw(p5, j * (sizeX - sizeX / 4), i * sizeY + additionalY, sizeX, sizeY);
+                hex.draw(p5, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
                 if (gameMap.getField(j, i).name === "Forest") {
-                    p5.image(forestLayer, j * (sizeX - sizeX / 4), i * sizeY + additionalY, sizeX, sizeY);
+                    p5.image(forestLayer, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
                 }
                 if (gameMap.getField(j, i).name === "Mountain") {
-                    p5.image(mountainLayer, j * (sizeX - sizeX / 4), i * sizeY + additionalY, sizeX, sizeY);
+                    p5.image(mountainLayer, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
                 }
 
             }
@@ -57,7 +63,7 @@ new p5(function (p5) {
     };
 
     p5.mouseClicked = function () {
-        let retPos = hex.getHexPos(p5.mouseX, p5.mouseY, r);
+        let retPos = hex.getHexPos(p5.mouseX - camX, p5.mouseY - camY, r);
 
         if (retPos.x % 2 !== 0) {
             retPos.y--;
@@ -73,6 +79,25 @@ new p5(function (p5) {
             gameMap.map[retPos.y][retPos.x].name = "Mountain";
             gameMap.map[retPos.y][retPos.x].owner = socket.id;
         }
+    };
+
+    p5.mousePressed = function () {
+        console.log("Pressed!");
+        offSetX = p5.mouseX;
+        offSetY = p5.mouseY;
+        pressed = true;
+    };
+
+    p5.mouseDragged = function () {
+        camX += (p5.mouseX - offSetX);
+        camY += (p5.mouseY - offSetY);
+
+        offSetX = p5.mouseX;
+        offSetY = p5.mouseY;
+    };
+
+    p5.mouseReleased = function () {
+        pressed = false;
     }
 
 });
