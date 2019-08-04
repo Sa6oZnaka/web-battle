@@ -4,7 +4,7 @@ import {Hex} from "./api/Hex.js";
 const socket = io();
 
 const hex = new Hex();
-const r = 70,
+let r = 70,
     sizeX = r * 2,
     sizeY = Math.sqrt(3) * r;
 
@@ -64,7 +64,7 @@ new p5(function (p5) {
     };
 
     p5.mouseClicked = function () {
-        if(mouseDragged)
+        if (mouseDragged)
             return;
 
         let retPos = hex.getHexPos(p5.mouseX - camX, p5.mouseY - camY, r);
@@ -105,6 +105,14 @@ new p5(function (p5) {
 
     p5.mouseReleased = function () {
         mousePressed = false;
+    };
+
+    p5.mouseWheel = function (event) {
+        console.log(event.delta);
+
+        r -= event.delta / 10;
+        sizeX = r * 2;
+        sizeY = Math.sqrt(3) * r;
     }
 
 });
