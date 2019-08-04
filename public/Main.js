@@ -2,8 +2,8 @@ import {GameMap} from "./api/GameMap.js";
 import {Hex} from "./api/Hex.js";
 
 const socket = io();
-
 const hex = new Hex();
+
 let r = 70,
     sizeX = r * 2,
     sizeY = Math.sqrt(3) * r;
@@ -12,14 +12,13 @@ let forestLayer,
     mountainLayer;
 
 let gameMap = new GameMap(10, 10);
+
 let camX = 0,
-    camY = 0;
-
-let offSetX = 0,
-    offSetY = 0;
-
-let mousePressed = false;
-let mouseDragged = false;
+    camY = 0,
+    offSetX = 0,
+    offSetY = 0,
+    mousePressed = false,
+    mouseDragged = false;
 
 new p5(function (p5) {
 
@@ -37,8 +36,16 @@ new p5(function (p5) {
     p5.draw = function () {
         p5.background(55);
 
-        for (let i = 0; i < 10; i++) {
-            for (let j = 0; j < 10; j++) {
+        for (let i = 0; i < gameMap.map.length; i++) {
+            for (let j = 0; j < gameMap.map[0].length; j++) {
+
+                // skip is player's camera can't see the field
+                if((i + 2) * sizeY < -camY ||
+                    (j + 2) * (sizeX - sizeX/4) < -camX ||
+                    (i) * sizeY - p5.height > -camY ||
+                    (j) * (sizeX - sizeX/4) - p5.width > -camX){
+                    continue;
+                }
 
                 let additionalY = 0;
                 if (j % 2 !== 0) {

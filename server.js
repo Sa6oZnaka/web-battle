@@ -1,9 +1,5 @@
 import {GameMap} from "./public/api/GameMap";
 
-let gameMap = new GameMap(10, 10);
-console.log(gameMap);
-
-
 let express = require('express');
 let app = express();
 let http = require('http').Server(app);
@@ -11,11 +7,13 @@ let io = require('socket.io')(http);
 
 app.use(express.static("public"));
 
+let gameMap = new GameMap(500, 500);
+
 io.on('connection', function (socket) {
     console.log(`ID ${socket.id} connected!`);
 
     socket.emit('init', {
-        'gameMap': gameMap,
+        'gameMap': gameMap
     });
 
     socket.on('spawn', function (data) {
