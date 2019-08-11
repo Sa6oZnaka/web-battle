@@ -11,7 +11,8 @@ let r = 70,
 let forestLayer,
     mountainLayer;
 
-let gameMap = new GameMap(10, 10);
+let gameMap = new GameMap(15, 10);
+gameMap.map = [[]];
 
 let camX = 0,
     camY = 0,
@@ -33,8 +34,14 @@ new p5(function (p5) {
         socket.emit('spawn', "/* IDK */");
     };
 
+    let a  = 0;
     p5.draw = function () {
         p5.background(55);
+
+        a ++;
+        if(a > 100) {
+            console.log(camX);
+        }
 
         for (let i = 0; i < gameMap.map.length; i++) {
             for (let j = 0; j < gameMap.map[0].length; j++) {
@@ -115,11 +122,23 @@ new p5(function (p5) {
     };
 
     p5.mouseWheel = function (event) {
-        console.log(event.delta);
 
-        r -= event.delta / 10;
-        sizeX = r * 2;
-        sizeY = Math.sqrt(3) * r;
+        if(r - event.delta / 10 > 25 && r - event.delta / 10 < 150) {
+            r -= event.delta / 10;
+
+            let oldSizeX = sizeX;
+            let oldSizeY = sizeY;
+
+            sizeX = r * 2;
+            sizeY = Math.sqrt(3) * r;
+
+            let diffX = r * 2 / oldSizeX;
+            let diffY = Math.sqrt(3) * r / oldSizeY;
+
+            camX -= diffX * (p5.width / 2 - camX) + camX - p5.width/2;
+            camY -= diffY * (p5.height / 2 - camY) + camY - p5.height/2;
+
+        }
     }
 
 });
