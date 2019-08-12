@@ -1,46 +1,76 @@
 import {GameMap} from "./api/GameMap.js";
+import {Hex} from "./api/Hex.js";
 
-let socket = io();
-let gameMap = new GameMap(10, 10);
+const socket = io();
+const hex = new Hex();
 
-const r = 70,
+let r = 70,
     sizeX = r * 2,
     sizeY = Math.sqrt(3) * r;
 
-let img;
+let forestLayer,
+    mountainLayer;
+
+let gameMap = new GameMap(15, 10);
+gameMap.map = [[]];
+
+let camX = 0,
+    camY = 0,
+    offSetX = 0,
+    offSetY = 0,
+    mousePressed = false,
+    mouseDragged = false;
 
 new p5(function (p5) {
 
     p5.preload = function () {
-        img = p5.loadImage("./assets/tree.png");
+        forestLayer = p5.loadImage("./assets/tree.png");
+        mountainLayer = p5.loadImage("./assets/mountain.png");
     };
 
     p5.setup = function () {
         p5.createCanvas(1280, 720);
 
-        console.log(gameMap.map);
+        socket.emit('spawn', "/* IDK */");
     };
 
+    let a  = 0;
     p5.draw = function () {
         p5.background(55);
 
-        p5.fill(90, 43, 32);
-        p5.stroke(0);
-        p5.strokeWeight(2);
+        a ++;
+        if(a > 100) {
+            console.log(camX);
+        }
 
-        gameMap.map[2][3].name = "Iron";
+        for (let i = 0; i < gameMap.map.length; i++) {
+            for (let j = 0; j < gameMap.map[0].length; j++) {
 
-        for (let i = 0; i < 10; i++) {
-            for (let j = 0; j < 10; j++) {
+                // skip is player's camera can't see the field
+                if((i + 2) * sizeY < -camY ||
+                    (j + 2) * (sizeX - sizeX/4) < -camX ||
+                    (i) * sizeY - p5.height > -camY ||
+                    (j) * (sizeX - sizeX/4) - p5.width > -camX){
+                    continue;
+                }
 
                 let additionalY = 0;
-                if(j % 2 !== 0){
+                if (j % 2 !== 0) {
                     additionalY += sizeY / 2;
                 }
 
-                hexagon(p5, j * (sizeX - sizeX / 4), i * sizeY + additionalY, sizeX, sizeY);
-                if(gameMap.getField(j, i).name === "Forest") {
-                    p5.image(img, j * (sizeX - sizeX / 4), i * sizeY + additionalY, sizeX, sizeY);
+                if (gameMap.getField(j, i).owner === socket.id) {
+                    p5.fill(90, 0, 32);
+                } else {
+                    p5.fill(8, 62, 0);
+                }
+
+                hex.draw(p5, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
+                if (gameMap.getField(j, i).name === "Forest") {
+                    p5.image(forestLayer, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
+                }
+                if (gameMap.getField(j, i).name === "Mountain") {
+                    p5.image(mountainLayer, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
                 }
 
             }
@@ -48,66 +78,83 @@ new p5(function (p5) {
     };
 
     p5.mouseClicked = function () {
-        let retPos = getHex(p5.mouseX, p5.mouseY);
-        console.log(retPos);
+        if (mouseDragged)
+            return;
+
+        let retPos = hex.getHexPos(p5.mouseX - camX, p5.mouseY - camY, r);
+
         if (retPos.x % 2 !== 0) {
             retPos.y--;
         }
         if (retPos.x >= 0 && retPos.y >= 0) {
-            gameMap.map[retPos.y][retPos.x].name = "Iron";
+            socket.emit('update', {
+                "x": retPos.x,
+                "y": retPos.y,
+                "id": socket.id,
+                "type": "Mountain"
+            });
+
+            gameMap.map[retPos.y][retPos.x].name = "Mountain";
+            gameMap.map[retPos.y][retPos.x].owner = socket.id;
+        }
+    };
+
+    p5.mousePressed = function () {
+        offSetX = p5.mouseX;
+        offSetY = p5.mouseY;
+
+        mousePressed = true;
+        mouseDragged = false;
+    };
+
+    p5.mouseDragged = function () {
+        mouseDragged = true;
+
+        camX += (p5.mouseX - offSetX);
+        camY += (p5.mouseY - offSetY);
+
+        offSetX = p5.mouseX;
+        offSetY = p5.mouseY;
+    };
+
+    p5.mouseReleased = function () {
+        mousePressed = false;
+    };
+
+    p5.mouseWheel = function (event) {
+
+        if(r - event.delta / 10 > 25 && r - event.delta / 10 < 150) {
+            r -= event.delta / 10;
+
+            let oldSizeX = sizeX;
+            let oldSizeY = sizeY;
+
+            sizeX = r * 2;
+            sizeY = Math.sqrt(3) * r;
+
+            let diffX = r * 2 / oldSizeX;
+            let diffY = Math.sqrt(3) * r / oldSizeY;
+
+            camX -= diffX * (p5.width / 2 - camX) + camX - p5.width/2;
+            camY -= diffY * (p5.height / 2 - camY) + camY - p5.height/2;
+
         }
     }
 
 });
 
-function hexagon(p5, x, y, sizeX, sizeY) {
-    p5.push();
-    p5.translate(x, y);
-    p5.beginShape();
-    p5.vertex(sizeX / 4, 0);
-    p5.vertex(sizeX - sizeX / 4, 0);
-    p5.vertex(sizeX, sizeY / 2);
-    p5.vertex(sizeX - sizeX / 4, sizeY);
-    p5.vertex(sizeX / 4, sizeY);
-    p5.vertex(0, sizeY / 2);
-    p5.endShape(p5.CLOSE);
-    p5.pop();
-}
+socket.on('spawn', function (data) {
 
-function getHex(x, y) {
-    let retPos = {};
-    let xa, ya, xpos, xx, yy, r2, h2;
-    r2 = r / 2;
-    h2 = sizeY / 2;
-    xx = Math.floor(x / r2);
-    yy = Math.floor(y / h2);
-    xpos = Math.floor(xx / 3);
-    xx %= 6;
-    if (xx % 3 === 0) {      // column with diagonals
-        xa = (x % r2) / r2;  // to find the diagonals
-        ya = (y % h2) / h2;
-        if (yy % 2 === 0) {
-            ya = 1 - ya;
-        }
-        if (xx === 3) {
-            xa = 1 - xa;
-        }
-        if (xa > ya) {
-            retPos.x = xpos + (xx === 3 ? -1 : 0);
-            retPos.y = Math.floor(yy / 2);
-            return retPos;
-        }
-        retPos.x = xpos + (xx === 0 ? -1 : 0);
-        retPos.y = Math.floor((yy + 1) / 2);
-        return retPos;
-    }
-    if (xx < 3) {
-        retPos.x = xpos + (xx === 3 ? -1 : 0);
-        retPos.y = Math.floor(yy / 2);
-        return retPos;
-    }
-    retPos.x = xpos + (xx === 0 ? -1 : 0);
-    retPos.y = Math.floor((yy + 1) / 2);
+});
 
-    return retPos;
-}
+socket.on('update', function (data) {
+    gameMap.setField(data.x, data.y, data.id, data.type);
+});
+
+socket.on('delete', function (data) {
+
+});
+
+socket.on('init', function (data) {
+    gameMap.map = data.gameMap.map;
+});

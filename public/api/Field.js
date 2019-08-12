@@ -2,9 +2,9 @@ import {Resource} from "./Resource.js";
 
 export class Field {
 
-    constructor(name){
+    constructor(name, owner){
         this.name = name;
-        this.owner = null;
+        this.owner = owner;
 
         this.resources = [];
         this.generateResources(name);
