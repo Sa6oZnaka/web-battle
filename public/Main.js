@@ -135,8 +135,9 @@ new p5(function (p5) {
             let diffX = r * 2 / oldSizeX;
             let diffY = Math.sqrt(3) * r / oldSizeY;
 
-            camX -= diffX * (p5.width / 2 - camX) + camX - p5.width/2;
-            camY -= diffY * (p5.height / 2 - camY) + camY - p5.height/2;
+            camX -= diffX * (p5.mouseX - camX) + camX - p5.mouseX;
+            camY -= diffY * (p5.mouseY - camY) + camY - p5.mouseY;
+
 
         }
     }
