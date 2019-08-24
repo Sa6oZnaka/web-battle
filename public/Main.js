@@ -1,5 +1,6 @@
 import {GameMap} from "./api/GameMap.js";
 import {Hex} from "./api/Hex.js";
+import {FieldEnum} from "./api/FieldEnum.js";
 
 const socket = io();
 const hex = new Hex();
@@ -11,7 +12,7 @@ let r = 70,
 let forestLayer,
     mountainLayer;
 
-let gameMap = new GameMap(15, 10);
+let gameMap = new GameMap(0, 0);
 gameMap.map = [[]];
 
 let camX = 0,
@@ -31,17 +32,11 @@ new p5(function (p5) {
     p5.setup = function () {
         p5.createCanvas(1280, 720);
 
-        socket.emit('spawn', "/* IDK */");
+        socket.emit('spawn', "");
     };
 
-    let a  = 0;
     p5.draw = function () {
         p5.background(55);
-
-        a ++;
-        if(a > 100) {
-            console.log(camX);
-        }
 
         for (let i = 0; i < gameMap.map.length; i++) {
             for (let j = 0; j < gameMap.map[0].length; j++) {
@@ -59,17 +54,16 @@ new p5(function (p5) {
                     additionalY += sizeY / 2;
                 }
 
+                p5.fill(8, 62, 0);
                 if (gameMap.getField(j, i).owner === socket.id) {
                     p5.fill(90, 0, 32);
-                } else {
-                    p5.fill(8, 62, 0);
                 }
 
                 hex.draw(p5, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
-                if (gameMap.getField(j, i).name === "Forest") {
+                if (gameMap.getField(j, i).name === FieldEnum.FOREST) {
                     p5.image(forestLayer, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
                 }
-                if (gameMap.getField(j, i).name === "Mountain") {
+                if (gameMap.getField(j, i).name === FieldEnum.MOUNTAIN) {
                     p5.image(mountainLayer, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
                 }
 
@@ -91,10 +85,10 @@ new p5(function (p5) {
                 "x": retPos.x,
                 "y": retPos.y,
                 "id": socket.id,
-                "type": "Mountain"
+                "type": FieldEnum.MOUNTAIN
             });
 
-            gameMap.map[retPos.y][retPos.x].name = "Mountain";
+            gameMap.map[retPos.y][retPos.x].name = FieldEnum.MOUNTAIN;
             gameMap.map[retPos.y][retPos.x].owner = socket.id;
         }
     };
@@ -137,7 +131,6 @@ new p5(function (p5) {
 
             camX -= diffX * (p5.mouseX - camX) + camX - p5.mouseX;
             camY -= diffY * (p5.mouseY - camY) + camY - p5.mouseY;
-
 
         }
     }
