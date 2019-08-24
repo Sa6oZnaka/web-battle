@@ -42,10 +42,10 @@ new p5(function (p5) {
             for (let j = 0; j < gameMap.map[0].length; j++) {
 
                 // skip is player's camera can't see the field
-                if((i + 2) * sizeY < -camY ||
-                    (j + 2) * (sizeX - sizeX/4) < -camX ||
+                if ((i + 2) * sizeY < -camY ||
+                    (j + 2) * (sizeX - sizeX / 4) < -camX ||
                     (i) * sizeY - p5.height > -camY ||
-                    (j) * (sizeX - sizeX/4) - p5.width > -camX){
+                    (j) * (sizeX - sizeX / 4) - p5.width > -camX) {
                     continue;
                 }
 
@@ -54,7 +54,10 @@ new p5(function (p5) {
                     additionalY += sizeY / 2;
                 }
 
-                p5.fill(8, 62, 0);
+                p5.fill(7, 7, 7);
+                if (gameMap.getField(j, i).owner === null) {
+                    p5.fill(8, 62, 0);
+                }
                 if (gameMap.getField(j, i).owner === socket.id) {
                     p5.fill(90, 0, 32);
                 }
@@ -81,14 +84,11 @@ new p5(function (p5) {
             retPos.y--;
         }
         if (retPos.x >= 0 && retPos.y >= 0) {
-            socket.emit('update', {
+            socket.emit('updateOwner', {
                 "x": retPos.x,
                 "y": retPos.y,
-                "id": socket.id,
-                "type": FieldEnum.MOUNTAIN
+                "id": socket.id
             });
-
-            gameMap.map[retPos.y][retPos.x].name = FieldEnum.MOUNTAIN;
             gameMap.map[retPos.y][retPos.x].owner = socket.id;
         }
     };
@@ -117,7 +117,7 @@ new p5(function (p5) {
 
     p5.mouseWheel = function (event) {
 
-        if(r - event.delta / 10 > 25 && r - event.delta / 10 < 150) {
+        if (r - event.delta / 10 > 25 && r - event.delta / 10 < 150) {
             r -= event.delta / 10;
 
             let oldSizeX = sizeX;
@@ -145,8 +145,12 @@ socket.on('update', function (data) {
     gameMap.setField(data.x, data.y, data.id, data.type);
 });
 
-socket.on('delete', function (data) {
+socket.on('updateOwner', function (data) {
+    gameMap.updateOwner(data.x, data.y, data.id);
+});
 
+socket.on('delete', function (data) {
+    console.error(data.id + " Left");
 });
 
 socket.on('init', function (data) {

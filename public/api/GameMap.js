@@ -2,11 +2,11 @@ import {Field} from "./Field.js";
 
 export class GameMap {
 
-    constructor(sizeX, sizeY){
+    constructor(sizeX, sizeY) {
         this.map = GameMap.init(sizeX, sizeY);
     }
 
-    static init(x, y){
+    static init(x, y) {
         let array = [];
         for (let i = 0; i < y; ++i) {
             array[i] = [];
@@ -17,12 +17,16 @@ export class GameMap {
         return array;
     }
 
-    getField(x, y){
+    getField(x, y) {
         return this.map[y][x];
     }
 
-    setField(x, y, owner, name){
+    setField(x, y, owner, name) {
         this.map[y][x] = new Field(name, owner);
+    }
+
+    updateOwner(x, y, owner) {
+        this.map[y][x].owner = owner;
     }
 
 }

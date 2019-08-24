@@ -26,12 +26,21 @@ io.on('connection', function (socket) {
         socket.broadcast.emit('update', data);
     });
 
+    socket.on('updateOwner', function (data) {
+        gameMap.updateOwner(data.x, data.y, socket.id);
+
+        socket.broadcast.emit('updateOwner', data);
+    });
+
     socket.on('disconnect', function () {
         console.log(`ID ${socket.id} disconnected!`);
+        io.emit('delete', {
+            'id': socket.id
+        });
     });
 });
 
-http.listen(3000, function() {
+http.listen(3000, function () {
     console.log("server started on port 3000");
 });
 
