@@ -33,10 +33,11 @@ io.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function () {
-        console.log(`ID ${socket.id} disconnected!`);
+        gameMap.deleteOwner(socket.id);
         io.emit('delete', {
             'id': socket.id
         });
+        console.log(`ID ${socket.id} disconnected!`);
     });
 });
 

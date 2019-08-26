@@ -29,5 +29,15 @@ export class GameMap {
         this.map[y][x].owner = owner;
     }
 
+    deleteOwner(owner){
+        for(let i =0; i < this.map.length; i ++){
+            for(let j = 0; j < this.map[0].length; j ++){
+                if(this.map[i][j].owner === owner){
+                    this.map[i][j].owner = null;
+                }
+            }
+        }
+    }
+
 }
 

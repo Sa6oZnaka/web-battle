@@ -150,7 +150,8 @@ socket.on('updateOwner', function (data) {
 });
 
 socket.on('delete', function (data) {
-    console.error(data.id + " Left");
+    console.log(data.id + " Left");
+    gameMap.deleteOwner(data.id);
 });
 
 socket.on('init', function (data) {
