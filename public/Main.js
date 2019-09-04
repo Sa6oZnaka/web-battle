@@ -1,6 +1,7 @@
 import {GameMap} from "./api/GameMap.js";
 import {Hex} from "./api/Hex.js";
 import {FieldEnum} from "./api/FieldEnum.js";
+import {Player} from "./api/Player.js";
 
 const socket = io();
 const hex = new Hex();
@@ -9,18 +10,20 @@ let r = 70,
     sizeX = r * 2,
     sizeY = Math.sqrt(3) * r;
 
-let forestLayer,
-    mountainLayer;
-
 let gameMap = new GameMap(0, 0);
-gameMap.map = [[]];
+let players = new Map();
 
+// mouse movement
 let camX = 0,
     camY = 0,
     offSetX = 0,
     offSetY = 0,
     mousePressed = false,
     mouseDragged = false;
+
+// textures
+let forestLayer,
+    mountainLayer;
 
 new p5(function (p5) {
 
@@ -54,12 +57,13 @@ new p5(function (p5) {
                     additionalY += sizeY / 2;
                 }
 
+                p5.strokeWeight(0);
                 p5.fill(7, 7, 7);
                 if (gameMap.getField(j, i).owner === null) {
                     p5.fill(8, 62, 0);
-                }
-                if (gameMap.getField(j, i).owner === socket.id) {
-                    p5.fill(90, 0, 32);
+                }else{
+                    let c = players.get(gameMap.getField(j, i).owner).color;
+                    p5.fill(c[0], c[1], c[2], 70);
                 }
 
                 hex.draw(p5, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
@@ -72,6 +76,7 @@ new p5(function (p5) {
 
             }
         }
+
     };
 
     p5.mouseClicked = function () {
@@ -139,6 +144,8 @@ new p5(function (p5) {
 
 socket.on('spawn', function (data) {
 
+    players.set(data.id, new Player(data.color));
+    console.log(data);
 });
 
 socket.on('update', function (data) {
@@ -150,10 +157,10 @@ socket.on('updateOwner', function (data) {
 });
 
 socket.on('delete', function (data) {
-    console.log(data.id + " Left");
     gameMap.deleteOwner(data.id);
 });
 
 socket.on('init', function (data) {
     gameMap.map = data.gameMap.map;
+    players = new Map(JSON.parse(data.players));
 });

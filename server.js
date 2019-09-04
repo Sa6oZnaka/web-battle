@@ -1,4 +1,5 @@
 import {GameMap} from "./public/api/GameMap";
+import {Player} from "./public/api/Player.js";
 
 let express = require('express');
 let app = express();
@@ -8,16 +9,33 @@ let io = require('socket.io')(http);
 app.use(express.static("public"));
 
 let gameMap = new GameMap(500, 500);
+let players = new Map();
 
 io.on('connection', function (socket) {
     console.log(`ID ${socket.id} connected!`);
 
     socket.emit('init', {
-        'gameMap': gameMap
+        'gameMap': gameMap,
+        'players' : JSON.stringify(Array.from(players))
     });
 
-    socket.on('spawn', function (data) {
+    socket.on('spawn', function (username) {
+        console.log("Spawn called!");
 
+        let color = [];
+        color.push(Math.floor(Math.random() * 255));
+        color.push(Math.floor(Math.random() * 255));
+        color.push(Math.floor(Math.random() * 255));
+
+        let player = new Player(color);
+        players.set(socket.id, player);
+
+        let data = {
+            'id' : socket.id,
+            'color' : color
+        };
+
+        io.emit('spawn', data);
     });
 
     socket.on('update', function (data) {
@@ -33,7 +51,10 @@ io.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function () {
+
+        players.delete(socket.id);
         gameMap.deleteOwner(socket.id);
+
         io.emit('delete', {
             'id': socket.id
         });
