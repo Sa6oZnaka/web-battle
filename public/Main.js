@@ -57,14 +57,9 @@ new p5(function (p5) {
                     additionalY += sizeY / 2;
                 }
 
-                p5.strokeWeight(0);
+                p5.strokeWeight(0.5);
                 p5.fill(7, 7, 7);
-                if (gameMap.getField(j, i).owner === null) {
-                    p5.fill(8, 62, 0);
-                }else{
-                    let c = players.get(gameMap.getField(j, i).owner).color;
-                    p5.fill(c[0], c[1], c[2], 70);
-                }
+                p5.fill(8, 62, 0);
 
                 hex.draw(p5, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
                 if (gameMap.getField(j, i).name === FieldEnum.FOREST) {
@@ -74,6 +69,11 @@ new p5(function (p5) {
                     p5.image(mountainLayer, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
                 }
 
+                if(gameMap.getField(j, i).owner !== null){
+                    let c = players.get(gameMap.getField(j, i).owner).color;
+                    p5.fill(c[0], c[1], c[2], 80);
+                    hex.draw(p5, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
+                }
             }
         }
 
@@ -143,9 +143,7 @@ new p5(function (p5) {
 });
 
 socket.on('spawn', function (data) {
-
     players.set(data.id, new Player(data.color));
-    console.log(data);
 });
 
 socket.on('update', function (data) {
