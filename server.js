@@ -1,5 +1,5 @@
-import {GameMap} from "./public/api/GameMap";
 import {Player} from "./public/api/Player.js";
+import {Room} from "./public/api/Room";
 
 let express = require('express');
 let app = express();
@@ -8,19 +8,32 @@ let io = require('socket.io')(http);
 
 app.use(express.static("public"));
 
-let gameMap = new GameMap(500, 500);
-let players = new Map();
+const mapSizeX = 500,
+    mapSizeY = 500;
+
+let rooms = [];
 
 io.on('connection', function (socket) {
     console.log(`ID ${socket.id} connected!`);
 
-    socket.emit('init', {
-        'gameMap': gameMap,
-        'players' : JSON.stringify(Array.from(players))
+    socket.on('joinRoom', function (room) {
+        if (!rooms.includes(room)) {
+            rooms.push(new Room(room, mapSizeX, mapSizeY));
+        }
+        console.log(socket.id + " Joined " + room);
+        socket.join(room);
     });
 
-    socket.on('spawn', function (username) {
-        console.log("Spawn called!");
+    socket.emit('init', {});
+
+    socket.on('spawn', function (username, room) {
+
+        if (!rooms.includes(r => r.name === room)) {
+            rooms.push(new Room(room, mapSizeX, mapSizeY));
+            console.log("Room " + room + " created!");
+        }
+        socket.join(room);
+        console.log(socket.id + " Joined " + room);
 
         let color = [];
         color.push(Math.floor(Math.random() * 255));
@@ -28,32 +41,43 @@ io.on('connection', function (socket) {
         color.push(Math.floor(Math.random() * 255));
 
         let player = new Player(color);
-        players.set(socket.id, player);
+        rooms.filter(r => r.name === room)[0].connect(socket.id, player);
 
         let data = {
-            'id' : socket.id,
-            'color' : color
+            'id': socket.id,
+            'color': color,
+            'gameMap': rooms.filter(r => r.name === room)[0].gameMap,
+            'players': JSON.stringify(Array.from(rooms.filter(r => r.name === room)[0].players))
         };
 
-        io.emit('spawn', data);
+        let data2 = {
+            'id': socket.id,
+            'player': player
+        };
+
+        io.emit('newPlayer', data2);
+        socket.emit('spawn', data);
     });
 
     socket.on('update', function (data) {
-        gameMap.setField(data.x, data.y, socket.id, data.type);
-
+        rooms
+            .filter(r => r.players.has(socket.id))[0]
+            .gameMap.setField(data.x, data.y, socket.id, data.type);
         socket.broadcast.emit('update', data);
     });
 
     socket.on('updateOwner', function (data) {
-        gameMap.updateOwner(data.x, data.y, socket.id);
-
-        socket.broadcast.emit('updateOwner', data);
+        rooms
+            .filter(r => r.players.has(socket.id))[0]
+            .gameMap.updateOwner(data.x, data.y, socket.id);
+        socket.broadcast.to(data.room).emit('updateOwner', data);
     });
 
     socket.on('disconnect', function () {
 
-        players.delete(socket.id);
-        gameMap.deleteOwner(socket.id);
+        let r = rooms.filter(r => r.players.has(socket.id))[0];
+        if (r !== undefined)
+            r.leave(socket.id);
 
         io.emit('delete', {
             'id': socket.id

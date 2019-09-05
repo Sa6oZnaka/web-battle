@@ -1,10 +1,10 @@
 import {GameMap} from "./api/GameMap.js";
 import {Hex} from "./api/Hex.js";
 import {FieldEnum} from "./api/FieldEnum.js";
-import {Player} from "./api/Player.js";
 
 const socket = io();
 const hex = new Hex();
+const room = 'room1';
 
 let r = 70,
     sizeX = r * 2,
@@ -35,7 +35,7 @@ new p5(function (p5) {
     p5.setup = function () {
         p5.createCanvas(1280, 720);
 
-        socket.emit('spawn', "");
+        //socket.emit('spawn', "");
     };
 
     p5.draw = function () {
@@ -69,7 +69,7 @@ new p5(function (p5) {
                     p5.image(mountainLayer, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
                 }
 
-                if(gameMap.getField(j, i).owner !== null){
+                if (gameMap.getField(j, i).owner !== null) {
                     let c = players.get(gameMap.getField(j, i).owner).color;
                     p5.fill(c[0], c[1], c[2], 80);
                     hex.draw(p5, j * (sizeX - sizeX / 4) + camX, i * sizeY + additionalY + camY, sizeX, sizeY);
@@ -92,7 +92,8 @@ new p5(function (p5) {
             socket.emit('updateOwner', {
                 "x": retPos.x,
                 "y": retPos.y,
-                "id": socket.id
+                "id": socket.id,
+                "room": room
             });
             gameMap.map[retPos.y][retPos.x].owner = socket.id;
         }
@@ -143,7 +144,12 @@ new p5(function (p5) {
 });
 
 socket.on('spawn', function (data) {
-    players.set(data.id, new Player(data.color));
+    gameMap.map = data.gameMap.map;
+    players = new Map(JSON.parse(data.players));
+});
+
+socket.on('newPlayer', function (data) {
+    players.set(data.id, data.player);
 });
 
 socket.on('update', function (data) {
@@ -159,6 +165,5 @@ socket.on('delete', function (data) {
 });
 
 socket.on('init', function (data) {
-    gameMap.map = data.gameMap.map;
-    players = new Map(JSON.parse(data.players));
+    socket.emit('spawn', "Username", room);
 });
