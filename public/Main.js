@@ -88,7 +88,8 @@ new p5(function (p5) {
         if (retPos.x % 2 !== 0) {
             retPos.y--;
         }
-        if (retPos.x >= 0 && retPos.y >= 0) {
+
+        if (! gameMap.outOfBonds(retPos.x, retPos.y)) {
             socket.emit('updateOwner', {
                 "x": retPos.x,
                 "y": retPos.y,
@@ -144,6 +145,7 @@ new p5(function (p5) {
 });
 
 socket.on('spawn', function (data) {
+    console.log("Spawn called!");
     gameMap.map = data.gameMap.map;
     players = new Map(JSON.parse(data.players));
 });

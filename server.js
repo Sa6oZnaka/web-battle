@@ -60,17 +60,19 @@ io.on('connection', function (socket) {
     });
 
     socket.on('update', function (data) {
-        rooms
+        if (rooms
             .filter(r => r.players.has(socket.id))[0]
-            .gameMap.setField(data.x, data.y, socket.id, data.type);
-        socket.broadcast.emit('update', data);
+            .gameMap.setField(data.x, data.y, socket.id, data.type))
+
+            socket.broadcast.emit('update', data);
     });
 
     socket.on('updateOwner', function (data) {
-        rooms
+        if (rooms
             .filter(r => r.players.has(socket.id))[0]
-            .gameMap.updateOwner(data.x, data.y, socket.id);
-        socket.broadcast.to(data.room).emit('updateOwner', data);
+            .gameMap.updateOwner(data.x, data.y, socket.id))
+
+            socket.broadcast.to(data.room).emit('updateOwner', data);
     });
 
     socket.on('disconnect', function () {
