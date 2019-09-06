@@ -1,5 +1,5 @@
 import {Player} from "./public/api/Player.js";
-import {Room} from "./public/api/Room";
+import {Room} from "./public/api/Room.js";
 
 let express = require('express');
 let app = express();
@@ -55,7 +55,7 @@ io.on('connection', function (socket) {
             'player': player
         };
 
-        io.emit('newPlayer', data2);
+        socket.broadcast.to(room).emit('newPlayer', data2);
         socket.emit('spawn', data);
     });
 
@@ -76,10 +76,10 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
 
         let r = rooms.filter(r => r.players.has(socket.id))[0];
-        if (r !== undefined)
-            r.leave(socket.id);
+        r.leave(socket.id);
+        r.gameMap.deleteOwner(socket.id);
 
-        io.emit('delete', {
+        socket.broadcast.to(r.name).emit('delete', {
             'id': socket.id
         });
         console.log(`ID ${socket.id} disconnected!`);

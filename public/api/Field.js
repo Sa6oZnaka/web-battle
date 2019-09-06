@@ -12,7 +12,7 @@ export class Field {
 
         this.owner = null;
         this.resources = [];
-        this.generateResources(name);
+        this.generateResources(this.name);
     }
 
     generateResources(name) {
