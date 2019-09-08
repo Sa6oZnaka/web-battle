@@ -28,7 +28,7 @@ io.on('connection', function (socket) {
 
     socket.on('spawn', function (username, room) {
 
-        if (!rooms.includes(r => r.name === room)) {
+        if (!rooms.find(r => r.name === room)) {
             rooms.push(new Room(room, mapSizeX, mapSizeY));
             console.log("Room " + room + " created!");
         }
