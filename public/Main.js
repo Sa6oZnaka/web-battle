@@ -1,6 +1,6 @@
 import {GameMap} from "./api/GameMap.js";
 import {Hex} from "./api/Hex.js";
-import {FieldEnum} from "./api/FieldEnum.js";
+import {FieldEnum} from "./enums/FieldEnum.js";
 
 const socket = io();
 const hex = new Hex();
@@ -145,7 +145,6 @@ new p5(function (p5) {
 });
 
 socket.on('spawn', function (data) {
-    console.log("Spawn called!");
     gameMap.map = data.gameMap.map;
     players = new Map(JSON.parse(data.players));
 });
