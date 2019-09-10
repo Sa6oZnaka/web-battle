@@ -1,7 +1,7 @@
 export const FieldEnum = Object.freeze({
-    PLAINS: 0,
-    FOREST: 1,
-    MOUNTAIN: 2,
+    PLAINS: "Plains",
+    FOREST: "Forest",
+    MOUNTAIN: "Mountain",
     SAND: 3,
     WATER: 4
 });

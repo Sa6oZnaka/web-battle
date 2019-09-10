@@ -1,10 +1,14 @@
 import {GameMap} from "./api/GameMap.js";
 import {Hex} from "./api/Hex.js";
 import {FieldEnum} from "./enums/FieldEnum.js";
+import {Menu} from "./api/menu/Menu.js";
+import {BuildingFactory} from "./factories/BuildingFactory.js";
 
 const socket = io();
 const hex = new Hex();
 const room = 'room1';
+const canvasX = 1280,
+    canvasY = 720;
 
 let r = 70,
     sizeX = r * 2,
@@ -25,6 +29,13 @@ let camX = 0,
 let forestLayer,
     mountainLayer;
 
+// menu
+let mSizeX = canvasX * 0.75, mSizeY = canvasY * 0.75;
+let beginX = (canvasX - mSizeX) / 2,
+    beginY = (canvasY - mSizeY) / 2;
+let menu = new Menu("Test", beginX, beginY, mSizeX, mSizeY, [], null);
+menu.opened = false;
+
 new p5(function (p5) {
 
     p5.preload = function () {
@@ -33,8 +44,7 @@ new p5(function (p5) {
     };
 
     p5.setup = function () {
-        p5.createCanvas(1280, 720);
-
+        p5.createCanvas(canvasX, canvasY);
         //socket.emit('spawn', "");
     };
 
@@ -77,26 +87,41 @@ new p5(function (p5) {
             }
         }
 
+        if (menu.opened) {
+            menu.draw(p5);
+        }
+
     };
 
     p5.mouseClicked = function () {
-        if (mouseDragged)
-            return;
 
-        let retPos = hex.getHexPos(p5.mouseX - camX, p5.mouseY - camY, r);
+        if (menu.opened) {
+            menu.click(p5.mouseX, p5.mouseY);
+            if (menu.buttonBar[0].click(p5.mouseX, p5.mouseY)) {
+                gameMap.map[menu.pos.y][menu.pos.x].builings.push(BuildingFactory.mine());
+            }
+        } else {
+            if (mouseDragged)
+                return;
 
-        if (retPos.x % 2 !== 0) {
-            retPos.y--;
-        }
+            let retPos = hex.getHexPos(p5.mouseX - camX, p5.mouseY - camY, r);
+            if (retPos.x % 2 !== 0) {
+                retPos.y--;
+            }
 
-        if (! gameMap.outOfBonds(retPos.x, retPos.y)) {
-            socket.emit('updateOwner', {
-                "x": retPos.x,
-                "y": retPos.y,
-                "id": socket.id,
-                "room": room
-            });
-            gameMap.map[retPos.y][retPos.x].owner = socket.id;
+            if (!gameMap.outOfBonds(retPos.x, retPos.y)) {
+                if (gameMap.map[retPos.y][retPos.x].owner === socket.id) {
+                    menu = new Menu(gameMap.map[retPos.y][retPos.x].name, beginX, beginY, mSizeX, mSizeY, gameMap.map[retPos.y][retPos.x].builings, retPos);
+                } else {
+                    socket.emit('updateOwner', {
+                        "x": retPos.x,
+                        "y": retPos.y,
+                        "id": socket.id,
+                        "room": room
+                    });
+                    gameMap.map[retPos.y][retPos.x].owner = socket.id;
+                }
+            }
         }
     };
 
@@ -109,6 +134,8 @@ new p5(function (p5) {
     };
 
     p5.mouseDragged = function () {
+        if (menu.opened) return;
+
         mouseDragged = true;
 
         camX += (p5.mouseX - offSetX);
@@ -123,6 +150,8 @@ new p5(function (p5) {
     };
 
     p5.mouseWheel = function (event) {
+
+        if (menu.opened) return;
 
         if (r - event.delta / 10 > 25 && r - event.delta / 10 < 150) {
             r -= event.delta / 10;
