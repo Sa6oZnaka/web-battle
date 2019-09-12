@@ -13,7 +13,7 @@ export class Field {
         this.owner = null;
         this.resources = [];
         this.generateResources();
-        this.builings = [];
+        this.buildings = [];
     }
 
     generateResources() {
@@ -39,13 +39,13 @@ export class Field {
     }
 
     addBuidling(buidling){
-        this.builings.push(buidling);
+        this.buildings.push(buidling);
     }
 
     process(){
-        for(let i = 0; i < this.builings.length; i ++){
-            if(this.builings[i].enoughResources(this.resources, this.builings[i].getRequired())){
-                this.resources = this.builings.removeResources(this.builings.getRequired());
+        for(let i = 0; i < this.buildings.length; i ++){
+            if(this.buildings[i].enoughResources(this.resources, this.buildings[i].getRequired())){
+                this.resources = this.buildings.removeResources(this.buildings.getRequired());
             }
         }
     }

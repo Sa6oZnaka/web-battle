@@ -33,7 +33,7 @@ let forestLayer,
 let mSizeX = canvasX * 0.75, mSizeY = canvasY * 0.75;
 let beginX = (canvasX - mSizeX) / 2,
     beginY = (canvasY - mSizeY) / 2;
-let menu = new Menu("Test", beginX, beginY, mSizeX, mSizeY, [], null);
+let menu = new Menu("Test", beginX, beginY, mSizeX, mSizeY, [], null, socket, room);
 menu.opened = false;
 
 new p5(function (p5) {
@@ -96,9 +96,19 @@ new p5(function (p5) {
     p5.mouseClicked = function () {
 
         if (menu.opened) {
-            menu.click(p5.mouseX, p5.mouseY);
-            if (menu.buttonBar[0].click(p5.mouseX, p5.mouseY)) {
-                gameMap.map[menu.pos.y][menu.pos.x].builings.push(BuildingFactory.mine());
+            menu.click(p5.mouseX, p5.mouseY, gameMap.map[menu.pos.y][menu.pos.x].buildings);
+
+            if (menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length].click(p5.mouseX, p5.mouseY)) {
+                gameMap.map[menu.pos.y][menu.pos.x].buildings.push(BuildingFactory.mine());
+                menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].building = gameMap.map[menu.pos.y][menu.pos.x].buildings[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1];
+
+                socket.emit('updateBuildings', {
+                    "x": menu.pos.x,
+                    "y": menu.pos.y,
+                    "id": socket.id,
+                    "buildings" : gameMap.map[menu.pos.y][menu.pos.x].buildings,
+                    "room": room
+                });
             }
         } else {
             if (mouseDragged)
@@ -111,7 +121,7 @@ new p5(function (p5) {
 
             if (!gameMap.outOfBonds(retPos.x, retPos.y)) {
                 if (gameMap.map[retPos.y][retPos.x].owner === socket.id) {
-                    menu = new Menu(gameMap.map[retPos.y][retPos.x].name, beginX, beginY, mSizeX, mSizeY, gameMap.map[retPos.y][retPos.x].builings, retPos);
+                    menu = new Menu(gameMap.map[retPos.y][retPos.x].name, beginX, beginY, mSizeX, mSizeY, gameMap.map[retPos.y][retPos.x].buildings, retPos);
                 } else {
                     socket.emit('updateOwner', {
                         "x": retPos.x,
@@ -188,6 +198,10 @@ socket.on('update', function (data) {
 
 socket.on('updateOwner', function (data) {
     gameMap.updateOwner(data.x, data.y, data.id);
+});
+
+socket.on('updateBuildings', function (data) {
+    gameMap.map[data.y][data.x].buildings = data.buildings;
 });
 
 socket.on('delete', function (data) {

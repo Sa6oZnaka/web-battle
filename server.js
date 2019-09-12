@@ -8,8 +8,8 @@ let io = require('socket.io')(http);
 
 app.use(express.static("public"));
 
-const mapSizeX = 500,
-    mapSizeY = 500;
+const mapSizeX = 100,
+    mapSizeY = 100;
 
 let rooms = [];
 
@@ -64,10 +64,19 @@ io.on('connection', function (socket) {
             .filter(r => r.players.has(socket.id))[0]
             .gameMap.setField(data.x, data.y, socket.id, data.type))
 
-            socket.broadcast.emit('update', data);
+            socket.broadcast.to(data.room).emit('update', data);
+    });
+
+    socket.on('updateBuildings', function (data) {
+        rooms
+            .filter(r => r.players.has(socket.id))[0]
+            .gameMap.map[data.y][data.x].buildings = data.buildings;
+
+        socket.broadcast.to(data.room).emit('updateBuildings', data);
     });
 
     socket.on('updateOwner', function (data) {
+        if(! rooms.find(r => r.players.has(socket.id))) return;
         if (rooms
             .filter(r => r.players.has(socket.id))[0]
             .gameMap.updateOwner(data.x, data.y, socket.id))
@@ -78,6 +87,7 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
 
         let r = rooms.filter(r => r.players.has(socket.id))[0];
+        if(r === undefined) return;
         r.leave(socket.id);
         r.gameMap.deleteOwner(socket.id);
 

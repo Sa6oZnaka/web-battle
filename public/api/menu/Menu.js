@@ -1,5 +1,6 @@
 import {Button} from "./Button.js";
 import {ImageButton} from "./ImageButton.js";
+import {BuildingFactory} from "../../factories/BuildingFactory.js";
 
 export class Menu extends Button{
 
@@ -18,21 +19,15 @@ export class Menu extends Button{
             new ImageButton(this.beginX * 5, this.beginY + 180, 155, 200, buildings[4]),
             new ImageButton(this.beginX * 6, this.beginY + 180, 155, 200, buildings[5])
         ];
-
         this.pos = pos;
     }
 
     // @Override
-    click(mouseX, mouseY) {
+    click(mouseX, mouseY, buildings) {
         if(this.button.click(mouseX, mouseY)){
             this.opened = false;
         }
     }
-
-    open(){
-        this.opened = true;
-    }
-
 
     // @Override
     draw(p5){
