@@ -1,25 +1,25 @@
 import {TextButton} from "./TextButton.js";
 import {ImageButton} from "./ImageButton.js";
-import {Button} from "./Button.js";
+import {AmountAdjuster} from "./AmountAdjuster.js";
 
-export class Menu extends Button {
+export class BuildingMenu extends TextButton {
 
-    constructor(name, beginX, beginY, sizeX, sizeY, buildings, pos) {
+    constructor(name, beginX, beginY, sizeX, sizeY, building, pos) {
         super(beginX, beginY, sizeX, sizeY);
 
         this.name = name;
-        this.opened = true;
-
+        this.pos = pos;
         this.button = new TextButton(this.beginX, this.beginY, 120, 50, "Back");
         this.buttonBar = [];
         for (let i = 0; i < 6; i++) {
-            if (buildings[i] !== undefined) {
-                this.buttonBar.push(new ImageButton(this.beginX * (i + 1), this.beginY + 180, 155, 200, buildings[i].name, buildings[i].level));
+            if (building.resources[i] !== undefined) {
+                this.buttonBar.push(new ImageButton(this.beginX * (i + 1), this.beginY + 180, 155, 200, building.resources[i].name, buildings.resources[i].amount));
             } else {
                 this.buttonBar.push(new ImageButton(this.beginX * (i + 1), this.beginY + 180, 155, 200));
             }
         }
-        this.pos = pos;
+        this.amountAdjuster = new AmountAdjuster(this.beginX, this.beginY + 400, 155, 18, 200);
+        this.putButton = new TextButton(this.beginX, this.beginY + 418, 155, 18, "Put");
     }
 
     // @Override
@@ -27,6 +27,7 @@ export class Menu extends Button {
         if (this.button.click(mouseX, mouseY)) {
             this.opened = false;
         }
+        this.amountAdjuster.click(mouseX, mouseY);
     }
 
     // @Override
@@ -49,6 +50,9 @@ export class Menu extends Button {
         for (let i = 0; i < this.buttonBar.length; i++) {
             this.buttonBar[i].draw(p5);
         }
+
+        this.amountAdjuster.draw(p5);
+        this.putButton.draw(p5);
     }
 
 }

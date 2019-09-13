@@ -1,5 +1,5 @@
 export const BuildingEnum = Object.freeze({
-    MINE: 0,
-    W_FACILITY: 1,
-    VILLAGE: 2
+    MINE: "Mine",
+    W_FACILITY: "Wood Facility",
+    VILLAGE: "Village"
 });

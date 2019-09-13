@@ -3,6 +3,7 @@ import {Hex} from "./api/Hex.js";
 import {FieldEnum} from "./enums/FieldEnum.js";
 import {Menu} from "./api/menu/Menu.js";
 import {BuildingFactory} from "./factories/BuildingFactory.js";
+import {BuildingMenu} from "./api/menu/BuildingMenu.js";
 
 const socket = io();
 const hex = new Hex();
@@ -33,7 +34,7 @@ let forestLayer,
 let mSizeX = canvasX * 0.75, mSizeY = canvasY * 0.75;
 let beginX = (canvasX - mSizeX) / 2,
     beginY = (canvasY - mSizeY) / 2;
-let menu = new Menu("Test", beginX, beginY, mSizeX, mSizeY, [], null, socket, room);
+let menu = new Menu("Test", beginX, beginY, mSizeX, mSizeY, [], null);
 menu.opened = false;
 
 new p5(function (p5) {
@@ -94,25 +95,28 @@ new p5(function (p5) {
     };
 
     p5.mouseClicked = function () {
-
         if (menu.opened) {
-            menu.click(p5.mouseX, p5.mouseY, gameMap.map[menu.pos.y][menu.pos.x].buildings);
 
-            if (menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length].click(p5.mouseX, p5.mouseY)) {
+            menu.click(p5.mouseX, p5.mouseY);
+
+            if (menu.buttonBar[0].click(p5.mouseX, p5.mouseY) && menu.buttonBar[0].name !== undefined) {
+                menu = new BuildingMenu(gameMap.map[menu.pos.y][menu.pos.x].buildings[0].name, beginX, beginY, mSizeX, mSizeY, gameMap.map[menu.pos.y][menu.pos.x].buildings[0], menu.pos);
+                menu.opened = true;
+            } else if (menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length].click(p5.mouseX, p5.mouseY) && menu instanceof Menu) {
                 gameMap.map[menu.pos.y][menu.pos.x].buildings.push(BuildingFactory.mine());
-                menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].building = gameMap.map[menu.pos.y][menu.pos.x].buildings[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1];
+                menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name = gameMap.map[menu.pos.y][menu.pos.x].buildings[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name;
 
                 socket.emit('updateBuildings', {
                     "x": menu.pos.x,
                     "y": menu.pos.y,
                     "id": socket.id,
-                    "buildings" : gameMap.map[menu.pos.y][menu.pos.x].buildings,
+                    "buildings": gameMap.map[menu.pos.y][menu.pos.x].buildings,
                     "room": room
                 });
             }
         } else {
             if (mouseDragged)
-                return;
+              return;
 
             let retPos = hex.getHexPos(p5.mouseX - camX, p5.mouseY - camY, r);
             if (retPos.x % 2 !== 0) {

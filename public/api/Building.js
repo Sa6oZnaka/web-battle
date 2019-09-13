@@ -1,7 +1,7 @@
 export class Building {
 
-    constructor(type, upgrades, required, products) {
-        this.type = type;
+    constructor(name, upgrades, required, products) {
+        this.name = name;
         this.level = 1;
         this.resources = [];
 
@@ -12,16 +12,16 @@ export class Building {
 
     addResources(resources) {
         for (let i = 0; i < resources.length; i++) {
-            if(this.resources.find(r => r.name === resources[i].name)) {
+            if (this.resources.find(r => r.name === resources[i].name)) {
                 this.resources.filter(r => r.name === resources[i].name)[0].amount += resources[i].amount;
-            }else{
+            } else {
                 this.resources.push(resources[i]);
             }
         }
     }
 
     removeResources(resources, remove) {
-        if(! this.enoughResources(resources, remove)){
+        if (!this.enoughResources(resources, remove)) {
             return;
         }
         for (let i = 0; i < remove.length; i++) {
@@ -39,7 +39,7 @@ export class Building {
     }
 
     process() {
-        if(this.enoughResources(this.resources, this.required[this.level])) {
+        if (this.enoughResources(this.resources, this.required[this.level])) {
             this.removeResources(this.resources, this.required[this.level]);
             this.addResources(this.products[this.level]);
         }
@@ -52,7 +52,7 @@ export class Building {
         }
     }
 
-    getRequired(){
+    getRequired() {
         return this.required[this.level];
     }
 

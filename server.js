@@ -68,6 +68,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('updateBuildings', function (data) {
+        if(! rooms.find(r => r.players.has(socket.id))) return;
         rooms
             .filter(r => r.players.has(socket.id))[0]
             .gameMap.map[data.y][data.x].buildings = data.buildings;

@@ -3,7 +3,6 @@ export class Button {
     constructor(beginX, beginY, sizeX, sizeY) {
         this.beginX = beginX;
         this.beginY = beginY;
-
         this.sizeX = sizeX;
         this.sizeY = sizeY;
     }
@@ -21,14 +20,11 @@ export class Button {
     }
 
     draw(p5) {
-        p5.rect(this.beginX, this.beginY, 120, 50);
-        p5.textSize(32);
         if (!this.hover(p5.mouseX, p5.mouseY)) {
             p5.fill(0, 102, 153);
-            p5.text('back', this.beginX + 20, this.beginY + 34);
         } else {
             p5.fill(0);
-            p5.text('back', this.beginX + 20, this.beginY + 34);
         }
+        p5.rect(this.beginX, this.beginY, this.sizeX, this.sizeY);
     }
 }
