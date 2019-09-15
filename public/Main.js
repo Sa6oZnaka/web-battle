@@ -98,21 +98,53 @@ new p5(function (p5) {
         if (menu.opened) {
 
             menu.click(p5.mouseX, p5.mouseY);
+            if(menu instanceof Menu) {
+                if (menu.buttonBar[0].click(p5.mouseX, p5.mouseY) && menu.buttonBar[0].name !== undefined) {
+                    menu = new BuildingMenu(gameMap.map[menu.pos.y][menu.pos.x].buildings[0].name, beginX, beginY, mSizeX, mSizeY, gameMap.map[menu.pos.y][menu.pos.x].buildings[0], menu.pos);
+                    menu.opened = true;
+                } else if (menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length].click(p5.mouseX, p5.mouseY)) {
+                    gameMap.map[menu.pos.y][menu.pos.x].buildings.push(BuildingFactory.mine());
+                    menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name = gameMap.map[menu.pos.y][menu.pos.x].buildings[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name;
 
-            if (menu.buttonBar[0].click(p5.mouseX, p5.mouseY) && menu.buttonBar[0].name !== undefined) {
-                menu = new BuildingMenu(gameMap.map[menu.pos.y][menu.pos.x].buildings[0].name, beginX, beginY, mSizeX, mSizeY, gameMap.map[menu.pos.y][menu.pos.x].buildings[0], menu.pos);
-                menu.opened = true;
-            } else if (menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length].click(p5.mouseX, p5.mouseY) && menu instanceof Menu) {
-                gameMap.map[menu.pos.y][menu.pos.x].buildings.push(BuildingFactory.mine());
-                menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name = gameMap.map[menu.pos.y][menu.pos.x].buildings[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name;
+                    socket.emit('updateBuildings', {
+                        "x": menu.pos.x,
+                        "y": menu.pos.y,
+                        "id": socket.id,
+                        "buildings": gameMap.map[menu.pos.y][menu.pos.x].buildings,
+                        "room": room
+                    });
+                }
+            }
+            if(menu instanceof BuildingMenu){
+                console.log("BM");
+                if(menu.putButton.click(p5.mouseX, p5.mouseY)){
+                    gameMap.map[menu.pos.y][menu.pos.x].buildings[0].resources[0].amount += menu.amountAdjuster.amount;
+                    // TODO inventory.remove(amount)
+                    menu.amountAdjuster2.add(menu.amountAdjuster.amount);
 
-                socket.emit('updateBuildings', {
-                    "x": menu.pos.x,
-                    "y": menu.pos.y,
-                    "id": socket.id,
-                    "buildings": gameMap.map[menu.pos.y][menu.pos.x].buildings,
-                    "room": room
-                });
+                    gameMap.map[menu.pos.y][menu.pos.x].buildings[0].resources[0].amount = menu.amountAdjuster2.maxAmount;
+                    socket.emit('updateBuildings', {
+                        "x": menu.pos.x,
+                        "y": menu.pos.y,
+                        "id": socket.id,
+                        "buildings": gameMap.map[menu.pos.y][menu.pos.x].buildings,
+                        "room": room
+                    });
+                }
+                if(menu.takeButton.click(p5.mouseX, p5.mouseY)){
+                    gameMap.map[menu.pos.y][menu.pos.x].buildings[0].resources[0].amount -= menu.amountAdjuster2.amount;
+                    menu.amountAdjuster2.remove(menu.amountAdjuster2.amount);
+                    menu.amountAdjuster.add(menu.amountAdjuster2.amount);
+
+                    gameMap.map[menu.pos.y][menu.pos.x].buildings[0].resources[0].amount = menu.amountAdjuster2.maxAmount;
+                    socket.emit('updateBuildings', {
+                        "x": menu.pos.x,
+                        "y": menu.pos.y,
+                        "id": socket.id,
+                        "buildings": gameMap.map[menu.pos.y][menu.pos.x].buildings,
+                        "room": room
+                    });
+                }
             }
         } else {
             if (mouseDragged)
@@ -202,6 +234,8 @@ socket.on('update', function (data) {
 
 socket.on('updateOwner', function (data) {
     gameMap.updateOwner(data.x, data.y, data.id);
+    if(menu.pos.x === data.x && menu.pos.y === data.y)
+        menu.opened = false;
 });
 
 socket.on('updateBuildings', function (data) {

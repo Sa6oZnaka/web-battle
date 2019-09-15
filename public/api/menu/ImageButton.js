@@ -11,18 +11,17 @@ export class ImageButton extends TextButton {
 
     // @Override
     draw(p5) {
-        if (!this.hover(p5.mouseX, p5.mouseY)) {
-            if (this.name === undefined) {
-                p5.fill(8, 8, 8);
-            } else {
-                p5.fill(0, 200, 0);
-            }
-
+        if (this.name === undefined) {
+            p5.fill(255);
         } else {
-            p5.fill(0, 0, 0, 0.5);
+            p5.fill(0, 200, 0);
         }
         p5.strokeWeight(3);
         p5.rect(this.beginX, this.beginY, this.sizeX, this.sizeY);
+        if (this.hover(p5.mouseX, p5.mouseY)) {
+            p5.fill(0, 150);
+            p5.rect(this.beginX, this.beginY, this.sizeX, this.sizeY);
+        }
     }
 
 }

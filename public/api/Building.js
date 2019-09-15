@@ -1,9 +1,18 @@
+import {Resource} from "./Resource.js";
+import {ResourceEnum} from "../enums/ResourceEnum.js";
+
 export class Building {
 
     constructor(name, upgrades, required, products) {
         this.name = name;
         this.level = 1;
-        this.resources = [];
+        this.resources = [
+            new Resource(ResourceEnum.FOOD, 0),
+            new Resource(ResourceEnum.COAL, 0),
+            new Resource(ResourceEnum.ROCK, 0),
+            new Resource(ResourceEnum.IRON, 0),
+            new Resource(ResourceEnum.GOLD, 0)
+        ];
 
         this.required = required;
         this.products = products;

@@ -15,6 +15,16 @@ export class AmountAdjuster extends TextButton {
             this.amount = Math.round((mouseX - this.beginX) / (this.sizeX / this.maxAmount));
     }
 
+    remove(amount){
+        this.maxAmount -= amount;
+        this.amount = Math.floor(this.maxAmount / 2);
+    }
+
+    add(amount){
+        this.maxAmount += amount;
+        this.amount = Math.floor(this.maxAmount / 2);
+    }
+
     // @Override
     draw(p5) {
         p5.fill(160, 160, 160);
