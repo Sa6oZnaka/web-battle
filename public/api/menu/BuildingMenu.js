@@ -11,19 +11,21 @@ export class BuildingMenu extends TextButton {
         this.pos = pos;
         this.button = new TextButton(this.beginX, this.beginY, 120, 50, "Back");
         this.buttonBar = [];
+        this.amountAdjusters = [];
         for (let i = 0; i < 6; i++) {
             if (building.resources[i] !== undefined) {
                 console.log(building.resources[i]);
                 this.buttonBar.push(new ImageButton(this.beginX * (i + 1), this.beginY + 180, 155, 200, building.resources[i].name, building.resources[i].amount));
+                this.amountAdjusters.push(new AmountAdjuster(this.beginX * (i + 1), this.beginY + 400, 155, 200, building.resources[i]));
             } else {
                 this.buttonBar.push(new ImageButton(this.beginX * (i + 1), this.beginY + 180, 155, 200));
             }
         }
-        this.amountAdjuster = new AmountAdjuster(this.beginX, this.beginY + 400, 155, 18, 200);
-        this.putButton = new TextButton(this.beginX, this.beginY + 418, 155, 18, "Put");
+        //this.amountAdjuster = new Slider(this.beginX, this.beginY + 400, 155, 18, 200);
+        //this.putButton = new TextButton(this.beginX, this.beginY + 418, 155, 18, "Put");
 
-        this.amountAdjuster2 = new AmountAdjuster(this.beginX, this.beginY + 450, 155, 18, building.resources[0].amount);
-        this.takeButton = new TextButton(this.beginX, this.beginY + 468, 155, 18, "Take");
+        //this.amountAdjuster2 = new Slider(this.beginX, this.beginY + 450, 155, 18, building.resources[0].amount);
+        //this.takeButton = new TextButton(this.beginX, this.beginY + 468, 155, 18, "Take");
     }
 
     // @Override
@@ -31,12 +33,15 @@ export class BuildingMenu extends TextButton {
         if (this.button.click(mouseX, mouseY)) {
             this.opened = false;
         }
-        this.amountAdjuster.click(mouseX, mouseY);
-        this.amountAdjuster2.click(mouseX, mouseY);
+        for(let i = 0 ; i < this.amountAdjusters.length; i ++) {
+            this.amountAdjusters[i].click(mouseX, mouseY);
+        }
+        //this.amountAdjuster.click(mouseX, mouseY);
+        //this.amountAdjuster2.click(mouseX, mouseY);
     }
 
     // @Override
-    draw(p5) {
+    draw(p5, images) {
 
         // background
         p5.fill(255);
@@ -53,14 +58,18 @@ export class BuildingMenu extends TextButton {
 
         // squares
         for (let i = 0; i < this.buttonBar.length; i++) {
-            this.buttonBar[i].draw(p5);
+            this.buttonBar[i].draw(p5, images[i]);
         }
 
-        this.amountAdjuster.draw(p5);
-        this.putButton.draw(p5);
+        for(let i = 0; i < this.amountAdjusters.length; i ++){
+            this.amountAdjusters[i].draw(p5);
+        }
 
-        this.amountAdjuster2.draw(p5);
-        this.takeButton.draw(p5);
+        //this.amountAdjuster.draw(p5);
+        //this.putButton.draw(p5);
+
+        //this.amountAdjuster2.draw(p5);
+        //this.takeButton.draw(p5);
     }
 
 }

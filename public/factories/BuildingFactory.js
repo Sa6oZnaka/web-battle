@@ -23,11 +23,11 @@ export class BuildingFactory {
         ];
 
         let products = [
-            [new Resource(ResourceEnum.ROCK, 50), new Resource(ResourceEnum.COAL, 10)],
-            [new Resource(ResourceEnum.ROCK, 100), new Resource(ResourceEnum.COAL, 20), new Resource(ResourceEnum.IRON, 5)],
-            [new Resource(ResourceEnum.ROCK, 200), new Resource(ResourceEnum.COAL, 40), new Resource(ResourceEnum.IRON, 10), new Resource(ResourceEnum.GOLD, 5)],
-            [new Resource(ResourceEnum.ROCK, 400), new Resource(ResourceEnum.COAL, 80), new Resource(ResourceEnum.IRON, 20), new Resource(ResourceEnum.GOLD, 10)],
-            [new Resource(ResourceEnum.ROCK, 800), new Resource(ResourceEnum.COAL, 160), new Resource(ResourceEnum.IRON, 40), new Resource(ResourceEnum.GOLD, 20)]
+            [new Resource(ResourceEnum.STONES, 50), new Resource(ResourceEnum.COAL, 10)],
+            [new Resource(ResourceEnum.STONES, 100), new Resource(ResourceEnum.COAL, 20), new Resource(ResourceEnum.IRON, 5)],
+            [new Resource(ResourceEnum.STONES, 200), new Resource(ResourceEnum.COAL, 40), new Resource(ResourceEnum.IRON, 10), new Resource(ResourceEnum.GOLD, 5)],
+            [new Resource(ResourceEnum.STONES, 400), new Resource(ResourceEnum.COAL, 80), new Resource(ResourceEnum.IRON, 20), new Resource(ResourceEnum.GOLD, 10)],
+            [new Resource(ResourceEnum.STONES, 800), new Resource(ResourceEnum.COAL, 160), new Resource(ResourceEnum.IRON, 40), new Resource(ResourceEnum.GOLD, 20)]
         ];
 
         return new Building(BuildingEnum.MINE, upgrades, required, products);

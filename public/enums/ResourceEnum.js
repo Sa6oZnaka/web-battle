@@ -1,8 +1,8 @@
 export const ResourceEnum = Object.freeze({
-    WOOD: 0,
-    IRON: 1,
-    GOLD: 2,
-    COAL: 3,
-    FOOD: 4,
-    ROCK: 5
+    WOOD: "Wood",
+    IRON: "Iron",
+    GOLD: "Gold",
+    COAL: "Coal",
+    FOOD: "Food",
+    STONES: "Stones"
 });

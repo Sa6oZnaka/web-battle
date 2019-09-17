@@ -1,41 +1,42 @@
+import {Button} from "./Button.js";
+import {Slider} from "./Slider.js";
 import {TextButton} from "./TextButton.js";
 
-export class AmountAdjuster extends TextButton {
+export class AmountAdjuster extends Button{
 
-    constructor(beginX, beginY, sizeX, sizeY, maxAmount) {
+    constructor(beginX, beginY, sizeX, sizeY, resource){
         super(beginX, beginY, sizeX, sizeY);
 
-        this.maxAmount = maxAmount;
-        this.amount = Math.floor(maxAmount / 2);
+        this.resourceName = resource.name;
+        this.putSlider = new Slider(beginX, beginY + 5, sizeX, 18, 200);
+        this.putButton = new TextButton(beginX, beginY + 23, sizeX, 18, "Put");
+        this.takeSlider = new Slider(beginX, beginY + 50, sizeX, 18, resource.amount);
+        this.takeButton = new TextButton(beginX, beginY + 68, sizeX, 18, "Take");
     }
 
-    // @Override
     click(mouseX, mouseY) {
-        if (!this.outOfBonds(mouseX, mouseY))
-            this.amount = Math.round((mouseX - this.beginX) / (this.sizeX / this.maxAmount));
+        this.takeSlider.click(mouseX, mouseY);
+        this.putSlider.click(mouseX, mouseY);
+        if(this.takeButton.click(mouseX, mouseY)){
+            this.putSlider.add(this.takeSlider.amount);
+            this.takeSlider.remove(this.takeSlider.amount);
+        }
+        if(this.putButton.click(mouseX, mouseY)){
+            this.takeSlider.add(this.putSlider.amount);
+            this.putSlider.remove(this.putSlider.amount);
+        }
     }
 
-    remove(amount){
-        this.maxAmount -= amount;
-        this.amount = Math.floor(this.maxAmount / 2);
-    }
-
-    add(amount){
-        this.maxAmount += amount;
-        this.amount = Math.floor(this.maxAmount / 2);
-    }
-
-    // @Override
     draw(p5) {
-        p5.fill(160, 160, 160);
-        p5.rect(this.beginX, this.beginY, this.sizeX, this.sizeY);
 
-        p5.fill(0);
-        p5.rect(this.beginX, this.beginY, (this.sizeX / this.maxAmount) * this.amount, this.sizeY);
+        p5.textSize(18);
+        p5.fill(0, 102, 153);
+        p5.text(this.resourceName, this.beginX, this.beginY);
 
-        p5.textSize(this.sizeY);
-        p5.fill(255);
-        p5.text(this.amount, this.beginX * 3 / 2 - this.sizeY, this.beginY + this.sizeY * 0.8);
+        this.putSlider.draw(p5);
+        this.takeSlider.draw(p5);
+        this.putButton.draw(p5);
+        this.takeButton.draw(p5);
     }
 
 }

@@ -9,7 +9,8 @@ export class Building {
         this.resources = [
             new Resource(ResourceEnum.FOOD, 0),
             new Resource(ResourceEnum.COAL, 0),
-            new Resource(ResourceEnum.ROCK, 0),
+            new Resource(ResourceEnum.WOOD, 0),
+            new Resource(ResourceEnum.STONES, 0),
             new Resource(ResourceEnum.IRON, 0),
             new Resource(ResourceEnum.GOLD, 0)
         ];

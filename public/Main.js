@@ -30,6 +30,13 @@ let camX = 0,
 let forestLayer,
     mountainLayer;
 
+let coal,
+    food,
+    gold,
+    iron,
+    stone,
+    wood;
+
 // menu
 let mSizeX = canvasX * 0.75, mSizeY = canvasY * 0.75;
 let beginX = (canvasX - mSizeX) / 2,
@@ -42,6 +49,12 @@ new p5(function (p5) {
     p5.preload = function () {
         forestLayer = p5.loadImage("./assets/tree.png");
         mountainLayer = p5.loadImage("./assets/mountain.png");
+        coal = p5.loadImage("./assets/img/coal.png");
+        gold = p5.loadImage("./assets/img/gold.png");
+        food = p5.loadImage("./assets/img/food.png");
+        iron = p5.loadImage("./assets/img/iron.png");
+        stone = p5.loadImage("./assets/img/stone.png");
+        wood = p5.loadImage("./assets/img/wood.png");
     };
 
     p5.setup = function () {
@@ -89,7 +102,7 @@ new p5(function (p5) {
         }
 
         if (menu.opened) {
-            menu.draw(p5);
+            menu.draw(p5, [food, coal, wood, stone, iron, gold]);
         }
 
     };
@@ -117,34 +130,17 @@ new p5(function (p5) {
             }
             if(menu instanceof BuildingMenu){
                 console.log("BM");
-                if(menu.putButton.click(p5.mouseX, p5.mouseY)){
-                    gameMap.map[menu.pos.y][menu.pos.x].buildings[0].resources[0].amount += menu.amountAdjuster.amount;
-                    // TODO inventory.remove(amount)
-                    menu.amountAdjuster2.add(menu.amountAdjuster.amount);
 
-                    gameMap.map[menu.pos.y][menu.pos.x].buildings[0].resources[0].amount = menu.amountAdjuster2.maxAmount;
-                    socket.emit('updateBuildings', {
-                        "x": menu.pos.x,
-                        "y": menu.pos.y,
-                        "id": socket.id,
-                        "buildings": gameMap.map[menu.pos.y][menu.pos.x].buildings,
-                        "room": room
-                    });
+                for(let i = 0; i < 6; i ++){
+                    gameMap.map[menu.pos.y][menu.pos.x].buildings[0].resources[i].amount = menu.amountAdjusters[i].takeSlider.maxAmount;
                 }
-                if(menu.takeButton.click(p5.mouseX, p5.mouseY)){
-                    gameMap.map[menu.pos.y][menu.pos.x].buildings[0].resources[0].amount -= menu.amountAdjuster2.amount;
-                    menu.amountAdjuster2.remove(menu.amountAdjuster2.amount);
-                    menu.amountAdjuster.add(menu.amountAdjuster2.amount);
-
-                    gameMap.map[menu.pos.y][menu.pos.x].buildings[0].resources[0].amount = menu.amountAdjuster2.maxAmount;
-                    socket.emit('updateBuildings', {
-                        "x": menu.pos.x,
-                        "y": menu.pos.y,
-                        "id": socket.id,
-                        "buildings": gameMap.map[menu.pos.y][menu.pos.x].buildings,
-                        "room": room
-                    });
-                }
+                socket.emit('updateBuildings', {
+                    "x": menu.pos.x,
+                    "y": menu.pos.y,
+                    "id": socket.id,
+                    "buildings": gameMap.map[menu.pos.y][menu.pos.x].buildings,
+                    "room": room
+                });
             }
         } else {
             if (mouseDragged)

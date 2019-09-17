@@ -10,7 +10,8 @@ export class ImageButton extends TextButton {
     }
 
     // @Override
-    draw(p5) {
+    draw(p5, img) {
+
         if (this.name === undefined) {
             p5.fill(255);
         } else {
@@ -18,6 +19,10 @@ export class ImageButton extends TextButton {
         }
         p5.strokeWeight(3);
         p5.rect(this.beginX, this.beginY, this.sizeX, this.sizeY);
+
+        if(img !== undefined)
+            p5.image(img, this.beginX, this.beginY, this.sizeX, this.sizeY);
+
         if (this.hover(p5.mouseX, p5.mouseY)) {
             p5.fill(0, 150);
             p5.rect(this.beginX, this.beginY, this.sizeX, this.sizeY);
