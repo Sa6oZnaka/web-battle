@@ -21,11 +21,6 @@ export class BuildingMenu extends TextButton {
                 this.buttonBar.push(new ImageButton(this.beginX * (i + 1), this.beginY + 180, 155, 200));
             }
         }
-        //this.amountAdjuster = new Slider(this.beginX, this.beginY + 400, 155, 18, 200);
-        //this.putButton = new TextButton(this.beginX, this.beginY + 418, 155, 18, "Put");
-
-        //this.amountAdjuster2 = new Slider(this.beginX, this.beginY + 450, 155, 18, building.resources[0].amount);
-        //this.takeButton = new TextButton(this.beginX, this.beginY + 468, 155, 18, "Take");
     }
 
     // @Override
@@ -36,8 +31,6 @@ export class BuildingMenu extends TextButton {
         for(let i = 0 ; i < this.amountAdjusters.length; i ++) {
             this.amountAdjusters[i].click(mouseX, mouseY);
         }
-        //this.amountAdjuster.click(mouseX, mouseY);
-        //this.amountAdjuster2.click(mouseX, mouseY);
     }
 
     // @Override
@@ -64,12 +57,6 @@ export class BuildingMenu extends TextButton {
         for(let i = 0; i < this.amountAdjusters.length; i ++){
             this.amountAdjusters[i].draw(p5);
         }
-
-        //this.amountAdjuster.draw(p5);
-        //this.putButton.draw(p5);
-
-        //this.amountAdjuster2.draw(p5);
-        //this.takeButton.draw(p5);
     }
 
 }

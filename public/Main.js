@@ -17,6 +17,7 @@ let r = 70,
 
 let gameMap = new GameMap(0, 0);
 let players = new Map();
+let selectedBuilding = 0;
 
 // mouse movement
 let camX = 0,
@@ -111,11 +112,15 @@ new p5(function (p5) {
         if (menu.opened) {
 
             menu.click(p5.mouseX, p5.mouseY);
-            if(menu instanceof Menu) {
-                if (menu.buttonBar[0].click(p5.mouseX, p5.mouseY) && menu.buttonBar[0].name !== undefined) {
-                    menu = new BuildingMenu(gameMap.map[menu.pos.y][menu.pos.x].buildings[0].name, beginX, beginY, mSizeX, mSizeY, gameMap.map[menu.pos.y][menu.pos.x].buildings[0], menu.pos);
-                    menu.opened = true;
-                } else if (menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length].click(p5.mouseX, p5.mouseY)) {
+            if (menu instanceof Menu) {
+                for (let i = 0; i < menu.buttonBar.length; i++) {
+                    if (menu.buttonBar[i].click(p5.mouseX, p5.mouseY) && menu.buttonBar[i].name !== undefined) {
+                        menu = new BuildingMenu(gameMap.map[menu.pos.y][menu.pos.x].buildings[i].name, beginX, beginY, mSizeX, mSizeY, gameMap.map[menu.pos.y][menu.pos.x].buildings[i], menu.pos);
+                        menu.opened = true;
+                        selectedBuilding = i;
+                    }
+                }
+                if (menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length].click(p5.mouseX, p5.mouseY)) {
                     gameMap.map[menu.pos.y][menu.pos.x].buildings.push(BuildingFactory.mine());
                     menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name = gameMap.map[menu.pos.y][menu.pos.x].buildings[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name;
 
@@ -128,11 +133,9 @@ new p5(function (p5) {
                     });
                 }
             }
-            if(menu instanceof BuildingMenu){
-                console.log("BM");
-
-                for(let i = 0; i < 6; i ++){
-                    gameMap.map[menu.pos.y][menu.pos.x].buildings[0].resources[i].amount = menu.amountAdjusters[i].takeSlider.maxAmount;
+            if (menu instanceof BuildingMenu) {
+                for (let i = 0; i < 6; i++) {
+                    gameMap.map[menu.pos.y][menu.pos.x].buildings[selectedBuilding].resources[i].amount = menu.amountAdjusters[i].takeSlider.maxAmount;
                 }
                 socket.emit('updateBuildings', {
                     "x": menu.pos.x,
@@ -144,7 +147,7 @@ new p5(function (p5) {
             }
         } else {
             if (mouseDragged)
-              return;
+                return;
 
             let retPos = hex.getHexPos(p5.mouseX - camX, p5.mouseY - camY, r);
             if (retPos.x % 2 !== 0) {
@@ -230,7 +233,7 @@ socket.on('update', function (data) {
 
 socket.on('updateOwner', function (data) {
     gameMap.updateOwner(data.x, data.y, data.id);
-    if(menu.pos.x === data.x && menu.pos.y === data.y)
+    if (menu.pos.x === data.x && menu.pos.y === data.y)
         menu.opened = false;
 });
 
