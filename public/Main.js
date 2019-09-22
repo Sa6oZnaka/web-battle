@@ -118,7 +118,6 @@ new p5(function (p5) {
                     }
                 }
                 if (m.components.get("button" + [gameMap.map[menuPos.y][menuPos.x].buildings.length]).click(p5.mouseX, p5.mouseY)) {
-                    console.warn("New building menu!");
                     m = MenuFactory.newBuildingMenu(2, []);
                     return;
                 }
@@ -127,8 +126,6 @@ new p5(function (p5) {
             if (m.name === 2) {
                 if (m.components.get("button0").click(p5.mouseX, p5.mouseY)) {
                     gameMap.map[menuPos.y][menuPos.x].buildings.push(BuildingFactory.mine());
-                    menu.buttonBar[gameMap.map[menuPos.y][menuPos.x].buildings.length - 1].name = gameMap.map[menuPos.y][menuPos.x].buildings[gameMap.map[menuPos.y][menuPos.x].buildings.length - 1].name;
-
                     socket.emit('updateBuildings', {
                         "x": menuPos.x,
                         "y": menuPos.y,
@@ -141,6 +138,7 @@ new p5(function (p5) {
             }
             // Resource Menu
             for (let i = 0; i < 6; i++) {
+                if(m.components.get("adjuster" + i) !== undefined)
                 gameMap.map[menuPos.y][menuPos.x].buildings[selectedBuilding].resources[i].amount = m.components.get("adjuster" + i).takeSlider.maxAmount;
             }
             socket.emit('updateBuildings', {
@@ -240,8 +238,8 @@ socket.on('update', function (data) {
 
 socket.on('updateOwner', function (data) {
     gameMap.updateOwner(data.x, data.y, data.id);
-    if (menu.pos.x === data.x && menu.pos.y === data.y)
-        menu.opened = false;
+    if (menuPos.x === data.x && menuPos.y === data.y)
+        menuOpened = false;
 });
 
 socket.on('updateBuildings', function (data) {
