@@ -4,6 +4,7 @@ import {FieldEnum} from "./enums/FieldEnum.js";
 import {Menu} from "./api/menu/Menu.js";
 import {BuildingFactory} from "./factories/BuildingFactory.js";
 import {BuildingMenu} from "./api/menu/BuildingMenu.js";
+import {SelectMenu} from "./api/menu/SelectMenu.js";
 
 const socket = io();
 const hex = new Hex();
@@ -110,7 +111,6 @@ new p5(function (p5) {
 
     p5.mouseClicked = function () {
         if (menu.opened) {
-
             menu.click(p5.mouseX, p5.mouseY);
             if (menu instanceof Menu) {
                 for (let i = 0; i < menu.buttonBar.length; i++) {
@@ -121,16 +121,9 @@ new p5(function (p5) {
                     }
                 }
                 if (menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length].click(p5.mouseX, p5.mouseY)) {
-                    gameMap.map[menu.pos.y][menu.pos.x].buildings.push(BuildingFactory.mine());
-                    menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name = gameMap.map[menu.pos.y][menu.pos.x].buildings[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name;
-
-                    socket.emit('updateBuildings', {
-                        "x": menu.pos.x,
-                        "y": menu.pos.y,
-                        "id": socket.id,
-                        "buildings": gameMap.map[menu.pos.y][menu.pos.x].buildings,
-                        "room": room
-                    });
+                    menu = new SelectMenu("New Building", beginX, beginY, mSizeX, mSizeY, [BuildingFactory.mine()], menu.pos);
+                    console.warn("New select menu!");
+                    return;
                 }
             }
             if (menu instanceof BuildingMenu) {
@@ -144,6 +137,22 @@ new p5(function (p5) {
                     "buildings": gameMap.map[menu.pos.y][menu.pos.x].buildings,
                     "room": room
                 });
+            }
+            if (menu instanceof SelectMenu) {
+                if (menu.buttonBar[0].click(p5.mouseX, p5.mouseY)) {
+                    gameMap.map[menu.pos.y][menu.pos.x].buildings.push(BuildingFactory.mine());
+                    menu.buttonBar[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name = gameMap.map[menu.pos.y][menu.pos.x].buildings[gameMap.map[menu.pos.y][menu.pos.x].buildings.length - 1].name;
+
+                    socket.emit('updateBuildings', {
+                        "x": menu.pos.x,
+                        "y": menu.pos.y,
+                        "id": socket.id,
+                        "buildings": gameMap.map[menu.pos.y][menu.pos.x].buildings,
+                        "room": room
+                    });
+
+                    menu = new Menu(gameMap.map[menu.pos.y][menu.pos.x].name, beginX, beginY, mSizeX, mSizeY, gameMap.map[menu.pos.y][menu.pos.x].buildings, menu.pos);
+                }
             }
         } else {
             if (mouseDragged)
