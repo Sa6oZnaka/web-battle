@@ -2,9 +2,9 @@ import {Button} from "./Button.js";
 import {Slider} from "./Slider.js";
 import {TextButton} from "./TextButton.js";
 
-export class AmountAdjuster extends Button{
+export class AmountAdjuster extends Button {
 
-    constructor(beginX, beginY, sizeX, sizeY, resource){
+    constructor(beginX, beginY, sizeX, sizeY, resource) {
         super(beginX, beginY, sizeX, sizeY);
 
         this.resourceName = resource.name;
@@ -17,11 +17,11 @@ export class AmountAdjuster extends Button{
     click(mouseX, mouseY) {
         this.takeSlider.click(mouseX, mouseY);
         this.putSlider.click(mouseX, mouseY);
-        if(this.takeButton.click(mouseX, mouseY)){
+        if (this.takeButton.click(mouseX, mouseY)) {
             this.putSlider.add(this.takeSlider.amount);
             this.takeSlider.remove(this.takeSlider.amount);
         }
-        if(this.putButton.click(mouseX, mouseY)){
+        if (this.putButton.click(mouseX, mouseY)) {
             this.takeSlider.add(this.putSlider.amount);
             this.putSlider.remove(this.putSlider.amount);
         }
