@@ -201,7 +201,7 @@ new p5(function (p5) {
 
     p5.mouseWheel = function (event) {
 
-        if (menu.opened) return;
+        if (menuOpened) return;
 
         if (r - event.delta / 10 > 25 && r - event.delta / 10 < 150) {
             r -= event.delta / 10;
