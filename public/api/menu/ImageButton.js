@@ -2,11 +2,12 @@ import {TextButton} from "./TextButton.js";
 
 export class ImageButton extends TextButton {
 
-    constructor(beginX, beginY, sizeX, sizeY, name, amount) {
+    constructor(beginX, beginY, sizeX, sizeY, name, amount, texture) {
         super(beginX, beginY, sizeX, sizeY);
 
         this.name = name;
         this.amount = amount;
+        this.texture = texture;
     }
 
     // @Override
@@ -20,8 +21,8 @@ export class ImageButton extends TextButton {
         p5.strokeWeight(3);
         p5.rect(this.beginX, this.beginY, this.sizeX, this.sizeY);
 
-        if(img !== undefined)
-            p5.image(img, this.beginX, this.beginY, this.sizeX, this.sizeY);
+        if(this.texture !== undefined)
+            p5.image(this.texture, this.beginX, this.beginY, this.sizeX, this.sizeY);
 
         if (this.hover(p5.mouseX, p5.mouseY)) {
             p5.fill(0, 150);

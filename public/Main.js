@@ -30,28 +30,27 @@ let camX = 0,
 let forestLayer,
     mountainLayer;
 
-let coal,
-    food,
-    gold,
-    iron,
-    stone,
-    wood;
-
 let m = MenuFactory.fieldMenu(1, []);
 let menuOpened = false;
 let menuPos;
+
+let resourceTextures = new Map();
+let buildingTextures = new Map();
 
 new p5(function (p5) {
 
     p5.preload = function () {
         forestLayer = p5.loadImage("./assets/tree.png");
         mountainLayer = p5.loadImage("./assets/mountain.png");
-        coal = p5.loadImage("./assets/img/coal.png");
-        gold = p5.loadImage("./assets/img/gold.png");
-        food = p5.loadImage("./assets/img/food.png");
-        iron = p5.loadImage("./assets/img/iron.png");
-        stone = p5.loadImage("./assets/img/stone.png");
-        wood = p5.loadImage("./assets/img/wood.png");
+
+        resourceTextures.set("Coal", p5.loadImage("./assets/img/coal.png"));
+        resourceTextures.set("Gold", p5.loadImage("./assets/img/gold.png"));
+        resourceTextures.set("Food", p5.loadImage("./assets/img/food.png"));
+        resourceTextures.set("Iron", p5.loadImage("./assets/img/iron.png"));
+        resourceTextures.set("Stones", p5.loadImage("./assets/img/stone.png"));
+        resourceTextures.set("Wood", p5.loadImage("./assets/img/wood.png"));
+
+        buildingTextures.set("Mine", p5.loadImage("./assets/img/mine.png"));
     };
 
     p5.setup = function () {
@@ -113,17 +112,16 @@ new p5(function (p5) {
             if (m.name === 1) {
                 for (let i = 0; i < 6; i++) {
                     if (m.components.get("button" + i).click(p5.mouseX, p5.mouseY) && m.components.get("button" + i).name !== undefined) {
-                        m = MenuFactory.buildingMenu(3, gameMap.map[menuPos.y][menuPos.x].buildings[i]);
+                        m = MenuFactory.buildingMenu(3, gameMap.map[menuPos.y][menuPos.x].buildings[i], resourceTextures);
                         selectedBuilding = i;
                     }
                 }
-                if (m.components.get("button" + [gameMap.map[menuPos.y][menuPos.x].buildings.length]).click(p5.mouseX, p5.mouseY)) {
-                    m = MenuFactory.newBuildingMenu(2, []);
-                    return;
+                if (gameMap.map[menuPos.y][menuPos.x].buildings.length < 6 && m.components.get("button" + [gameMap.map[menuPos.y][menuPos.x].buildings.length]).click(p5.mouseX, p5.mouseY)) {
+                    m = MenuFactory.newBuildingMenu(buildingTextures);
                 }
             }
             // New Building
-            if (m.name === 2) {
+            else if (m.name === 2) {
                 if (m.components.get("button0").click(p5.mouseX, p5.mouseY)) {
                     gameMap.map[menuPos.y][menuPos.x].buildings.push(BuildingFactory.mine());
                     socket.emit('updateBuildings', {
@@ -133,21 +131,23 @@ new p5(function (p5) {
                         "buildings": gameMap.map[menuPos.y][menuPos.x].buildings,
                         "room": room
                     });
-                    m = MenuFactory.fieldMenu(1, gameMap.map[menuPos.y][menuPos.x].buildings);
+                    m = MenuFactory.fieldMenu(1, gameMap.map[menuPos.y][menuPos.x].buildings, buildingTextures);
                 }
             }
             // Resource Menu
-            for (let i = 0; i < 6; i++) {
-                if(m.components.get("adjuster" + i) !== undefined)
-                gameMap.map[menuPos.y][menuPos.x].buildings[selectedBuilding].resources[i].amount = m.components.get("adjuster" + i).takeSlider.maxAmount;
+            else if(m.name === 3) {
+                for (let i = 0; i < 6; i++) {
+                    if (m.components.get("adjuster" + i) !== undefined)
+                        gameMap.map[menuPos.y][menuPos.x].buildings[selectedBuilding].resources[i].amount = m.components.get("adjuster" + i).takeSlider.maxAmount;
+                }
+                socket.emit('updateBuildings', {
+                    "x": menuPos.x,
+                    "y": menuPos.y,
+                    "id": socket.id,
+                    "buildings": gameMap.map[menuPos.y][menuPos.x].buildings,
+                    "room": room
+                });
             }
-            socket.emit('updateBuildings', {
-                "x": menuPos.x,
-                "y": menuPos.y,
-                "id": socket.id,
-                "buildings": gameMap.map[menuPos.y][menuPos.x].buildings,
-                "room": room
-            });
         } else {
             if (mouseDragged)
                 return;
@@ -159,7 +159,7 @@ new p5(function (p5) {
 
             if (!gameMap.outOfBonds(retPos.x, retPos.y)) {
                 if (gameMap.map[retPos.y][retPos.x].owner === socket.id) {
-                    m = MenuFactory.fieldMenu(1, gameMap.map[retPos.y][retPos.x].buildings);
+                    m = MenuFactory.fieldMenu(1, gameMap.map[retPos.y][retPos.x].buildings, buildingTextures);
                     menuPos = retPos;
                     menuOpened = true;
                 } else {
