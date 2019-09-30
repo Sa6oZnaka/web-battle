@@ -51,6 +51,7 @@ new p5(function (p5) {
         resourceTextures.set("Wood", p5.loadImage("./assets/img/wood.png"));
 
         buildingTextures.set("Mine", p5.loadImage("./assets/img/mine.png"));
+        buildingTextures.set("Sawmill", p5.loadImage("./assets/img/sawmill.png"));
     };
 
     p5.setup = function () {
@@ -124,18 +125,21 @@ new p5(function (p5) {
             else if (m.name === 2) {
                 if (m.components.get("button0").click(p5.mouseX, p5.mouseY)) {
                     gameMap.map[menuPos.y][menuPos.x].buildings.push(BuildingFactory.mine());
-                    socket.emit('updateBuildings', {
-                        "x": menuPos.x,
-                        "y": menuPos.y,
-                        "id": socket.id,
-                        "buildings": gameMap.map[menuPos.y][menuPos.x].buildings,
-                        "room": room
-                    });
-                    m = MenuFactory.fieldMenu(1, gameMap.map[menuPos.y][menuPos.x].buildings, buildingTextures);
                 }
+                if (m.components.get("button1").click(p5.mouseX, p5.mouseY)) {
+                    gameMap.map[menuPos.y][menuPos.x].buildings.push(BuildingFactory.sawmill());
+                }
+                socket.emit('updateBuildings', {
+                    "x": menuPos.x,
+                    "y": menuPos.y,
+                    "id": socket.id,
+                    "buildings": gameMap.map[menuPos.y][menuPos.x].buildings,
+                    "room": room
+                });
+                m = MenuFactory.fieldMenu(1, gameMap.map[menuPos.y][menuPos.x].buildings, buildingTextures);
             }
             // Resource Menu
-            else if(m.name === 3) {
+            else if (m.name === 3) {
                 for (let i = 0; i < 6; i++) {
                     if (m.components.get("adjuster" + i) !== undefined)
                         gameMap.map[menuPos.y][menuPos.x].buildings[selectedBuilding].resources[i].amount = m.components.get("adjuster" + i).takeSlider.maxAmount;

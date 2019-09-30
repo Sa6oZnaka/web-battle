@@ -25,7 +25,7 @@ export class MenuFactory {
 
     static newBuildingMenu(textures) {
 
-        let buildings = [BuildingFactory.mine()];
+        let buildings = [BuildingFactory.mine(), BuildingFactory.sawmill()];
 
         let components = new Map();
         components.set("menu", new MenuComponent(160, 90, 960, 540));
