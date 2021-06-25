@@ -1,15 +1,20 @@
 import {Player} from "./public/api/Player.js";
 import {Room} from "./public/api/Room.js";
 
-let express = require('express');
-let app = express();
-let http = require('http').Server(app);
-let io = require('socket.io')(http);
+
+import { createServer } from "http";
+import { Server } from "socket.io";
+import express from 'express';
+
+const app = express(); 
+const server = createServer(app); 
+const socketio = new Server(server);
+
 
 app.use(express.static("public"));
 
-const mapSizeX = 500,
-      mapSizeY = 500;
+const mapSizeX = 100,
+    mapSizeY = 100;
 
 let rooms = [];
 
@@ -28,7 +33,7 @@ io.on('connection', function (socket) {
 
     socket.on('spawn', function (username, room) {
 
-        if (!rooms.includes(r => r.name === room)) {
+        if (!rooms.find(r => r.name === room)) {
             rooms.push(new Room(room, mapSizeX, mapSizeY));
             console.log("Room " + room + " created!");
         }
@@ -60,22 +65,35 @@ io.on('connection', function (socket) {
     });
 
     socket.on('update', function (data) {
+        if (rooms
+            .filter(r => r.players.has(socket.id))[0]
+            .gameMap.setField(data.x, data.y, socket.id, data.type))
+
+            socket.broadcast.to(data.room).emit('update', data);
+    });
+
+    socket.on('updateBuildings', function (data) {
+        if(! rooms.find(r => r.players.has(socket.id))) return;
         rooms
             .filter(r => r.players.has(socket.id))[0]
-            .gameMap.setField(data.x, data.y, socket.id, data.type);
-        socket.broadcast.emit('update', data);
+            .gameMap.map[data.y][data.x].buildings = data.buildings;
+
+        socket.broadcast.to(data.room).emit('updateBuildings', data);
     });
 
     socket.on('updateOwner', function (data) {
-        rooms
+        if(! rooms.find(r => r.players.has(socket.id))) return;
+        if (rooms
             .filter(r => r.players.has(socket.id))[0]
-            .gameMap.updateOwner(data.x, data.y, socket.id);
-        socket.broadcast.to(data.room).emit('updateOwner', data);
+            .gameMap.updateOwner(data.x, data.y, socket.id))
+
+            socket.broadcast.to(data.room).emit('updateOwner', data);
     });
 
     socket.on('disconnect', function () {
 
         let r = rooms.filter(r => r.players.has(socket.id))[0];
+        if(r === undefined) return;
         r.leave(socket.id);
         r.gameMap.deleteOwner(socket.id);
 
@@ -86,6 +104,8 @@ io.on('connection', function (socket) {
     });
 });
 
-http.listen(3000, function () {
-    console.log("server started on port 3000");
+let port = process.env.PORT || 3000;
+http.listen(port, function () {
+    console.log("server started on port " + port);
 });
+
