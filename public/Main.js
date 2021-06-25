@@ -1,10 +1,14 @@
 import {GameMap} from "./api/GameMap.js";
 import {Hex} from "./api/Hex.js";
-import {FieldEnum} from "./api/FieldEnum.js";
+import {FieldEnum} from "./enums/FieldEnum.js";
+import {BuildingFactory} from "./factories/BuildingFactory.js";
+import {MenuFactory} from "./factories/MenuFactory.js";
 
 const socket = io();
 const hex = new Hex();
 const room = 'room1';
+const canvasX = 1280,
+    canvasY = 720;
 
 let r = 70,
     sizeX = r * 2,
@@ -12,6 +16,7 @@ let r = 70,
 
 let gameMap = new GameMap(0, 0);
 let players = new Map();
+let selectedBuilding = 0;
 
 // mouse movement
 let camX = 0,
@@ -25,16 +30,32 @@ let camX = 0,
 let forestLayer,
     mountainLayer;
 
+let m = MenuFactory.fieldMenu(1, []);
+let menuOpened = false;
+let menuPos;
+
+let resourceTextures = new Map();
+let buildingTextures = new Map();
+
 new p5(function (p5) {
 
     p5.preload = function () {
         forestLayer = p5.loadImage("./assets/tree.png");
         mountainLayer = p5.loadImage("./assets/mountain.png");
+
+        resourceTextures.set("Coal", p5.loadImage("./assets/img/coal.png"));
+        resourceTextures.set("Gold", p5.loadImage("./assets/img/gold.png"));
+        resourceTextures.set("Food", p5.loadImage("./assets/img/food.png"));
+        resourceTextures.set("Iron", p5.loadImage("./assets/img/iron.png"));
+        resourceTextures.set("Stones", p5.loadImage("./assets/img/stone.png"));
+        resourceTextures.set("Wood", p5.loadImage("./assets/img/wood.png"));
+
+        buildingTextures.set("Mine", p5.loadImage("./assets/img/mine.png"));
+        buildingTextures.set("Sawmill", p5.loadImage("./assets/img/sawmill.png"));
     };
 
     p5.setup = function () {
-        p5.createCanvas(1280, 720);
-
+        p5.createCanvas(canvasX, canvasY);
         //socket.emit('spawn', "");
     };
 
@@ -77,25 +98,84 @@ new p5(function (p5) {
             }
         }
 
+        if (menuOpened)
+            m.draw(p5);
     };
 
     p5.mouseClicked = function () {
-        if (mouseDragged)
-            return;
+        m.click(p5.mouseX, p5.mouseY);
+        if (menuOpened) {
+            // Close button
+            if (m.components.get("backButton").click(p5.mouseX, p5.mouseY)) {
+                menuOpened = false;
+            }
+            // Field Menu
+            if (m.name === 1) {
+                for (let i = 0; i < 6; i++) {
+                    if (m.components.get("button" + i).click(p5.mouseX, p5.mouseY) && m.components.get("button" + i).name !== undefined) {
+                        m = MenuFactory.buildingMenu(3, gameMap.map[menuPos.y][menuPos.x].buildings[i], resourceTextures);
+                        selectedBuilding = i;
+                    }
+                }
+                if (gameMap.map[menuPos.y][menuPos.x].buildings.length < 6 && m.components.get("button" + [gameMap.map[menuPos.y][menuPos.x].buildings.length]).click(p5.mouseX, p5.mouseY)) {
+                    m = MenuFactory.newBuildingMenu(buildingTextures);
+                }
+            }
+            // New Building
+            else if (m.name === 2) {
+                if (m.components.get("button0").click(p5.mouseX, p5.mouseY)) {
+                    gameMap.map[menuPos.y][menuPos.x].buildings.push(BuildingFactory.mine());
+                }
+                if (m.components.get("button1").click(p5.mouseX, p5.mouseY)) {
+                    gameMap.map[menuPos.y][menuPos.x].buildings.push(BuildingFactory.sawmill());
+                }
+                socket.emit('updateBuildings', {
+                    "x": menuPos.x,
+                    "y": menuPos.y,
+                    "id": socket.id,
+                    "buildings": gameMap.map[menuPos.y][menuPos.x].buildings,
+                    "room": room
+                });
+                m = MenuFactory.fieldMenu(1, gameMap.map[menuPos.y][menuPos.x].buildings, buildingTextures);
+            }
+            // Resource Menu
+            else if (m.name === 3) {
+                for (let i = 0; i < 6; i++) {
+                    if (m.components.get("adjuster" + i) !== undefined)
+                        gameMap.map[menuPos.y][menuPos.x].buildings[selectedBuilding].resources[i].amount = m.components.get("adjuster" + i).takeSlider.maxAmount;
+                }
+                socket.emit('updateBuildings', {
+                    "x": menuPos.x,
+                    "y": menuPos.y,
+                    "id": socket.id,
+                    "buildings": gameMap.map[menuPos.y][menuPos.x].buildings,
+                    "room": room
+                });
+            }
+        } else {
+            if (mouseDragged)
+                return;
 
-        let retPos = hex.getHexPos(p5.mouseX - camX, p5.mouseY - camY, r);
+            let retPos = hex.getHexPos(p5.mouseX - camX, p5.mouseY - camY, r);
+            if (retPos.x % 2 !== 0) {
+                retPos.y--;
+            }
 
-        if (retPos.x % 2 !== 0) {
-            retPos.y--;
-        }
-        if (retPos.x >= 0 && retPos.y >= 0) {
-            socket.emit('updateOwner', {
-                "x": retPos.x,
-                "y": retPos.y,
-                "id": socket.id,
-                "room": room
-            });
-            gameMap.map[retPos.y][retPos.x].owner = socket.id;
+            if (!gameMap.outOfBonds(retPos.x, retPos.y)) {
+                if (gameMap.map[retPos.y][retPos.x].owner === socket.id) {
+                    m = MenuFactory.fieldMenu(1, gameMap.map[retPos.y][retPos.x].buildings, buildingTextures);
+                    menuPos = retPos;
+                    menuOpened = true;
+                } else {
+                    socket.emit('updateOwner', {
+                        "x": retPos.x,
+                        "y": retPos.y,
+                        "id": socket.id,
+                        "room": room
+                    });
+                    gameMap.map[retPos.y][retPos.x].owner = socket.id;
+                }
+            }
         }
     };
 
@@ -108,6 +188,8 @@ new p5(function (p5) {
     };
 
     p5.mouseDragged = function () {
+        if (menuOpened) return;
+
         mouseDragged = true;
 
         camX += (p5.mouseX - offSetX);
@@ -122,6 +204,8 @@ new p5(function (p5) {
     };
 
     p5.mouseWheel = function (event) {
+
+        if (menuOpened) return;
 
         if (r - event.delta / 10 > 25 && r - event.delta / 10 < 150) {
             r -= event.delta / 10;
@@ -158,6 +242,12 @@ socket.on('update', function (data) {
 
 socket.on('updateOwner', function (data) {
     gameMap.updateOwner(data.x, data.y, data.id);
+    if (menuPos.x === data.x && menuPos.y === data.y)
+        menuOpened = false;
+});
+
+socket.on('updateBuildings', function (data) {
+    gameMap.map[data.y][data.x].buildings = data.buildings;
 });
 
 socket.on('delete', function (data) {

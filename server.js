@@ -9,7 +9,7 @@ let io = require('socket.io')(http);
 app.use(express.static("public"));
 
 const mapSizeX = 500,
-    mapSizeY = 500;
+      mapSizeY = 500;
 
 let rooms = [];
 
@@ -89,4 +89,3 @@ io.on('connection', function (socket) {
 http.listen(3000, function () {
     console.log("server started on port 3000");
 });
-

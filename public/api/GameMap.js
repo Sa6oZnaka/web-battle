@@ -18,15 +18,24 @@ export class GameMap {
     }
 
     getField(x, y) {
-        return this.map[y][x];
+        if(! this.outOfBonds(x, y))
+            return this.map[y][x];
     }
 
     setField(x, y, owner, name) {
-        this.map[y][x] = new Field(name, owner);
+        if(! this.outOfBonds(x, y)) {
+            this.map[y][x] = new Field(name, owner);
+            return true;
+        }
+        return false;
     }
 
     updateOwner(x, y, owner) {
-        this.map[y][x].owner = owner;
+        if(! this.outOfBonds(x, y)) {
+            this.map[y][x].owner = owner;
+            return true;
+        }
+        return false;
     }
 
     deleteOwner(owner){
@@ -40,7 +49,7 @@ export class GameMap {
     }
 
     outOfBonds(x, y) {
-        return x < 0 || y < 0 || x > this.map[0].length || y > this.map.length;
+        return x < 0 || y < 0 || x >= this.map[0].length || y >= this.map.length;
     }
 
     getNeighbors(x, y){

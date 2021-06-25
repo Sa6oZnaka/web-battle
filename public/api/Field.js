@@ -1,5 +1,5 @@
-import {Resource} from "./Resource.js";
-import {FieldEnum} from "./FieldEnum.js";
+import {FieldEnum} from "../enums/FieldEnum.js";
+import {ResourceFactory} from "../factories/ResourceFactory.js";
 
 export class Field {
 
@@ -12,18 +12,20 @@ export class Field {
 
         this.owner = null;
         this.resources = [];
-        this.generateResources(this.name);
+        this.generateResources();
+        this.buildings = [];
     }
 
-    generateResources(name) {
-        if (name === FieldEnum.FOREST) {
-            let resource = new Resource("Wood", Math.floor(Math.random() * 100), 10);
-            this.addResource(resource);
+    generateResources() {
+        if(this.name === FieldEnum.FOREST){
+            this.resources = ResourceFactory.forest();
         }
-    }
-
-    addResource(resource) {
-        this.resources.push(resource);
+        else if(this.name === FieldEnum.MOUNTAIN){
+            this.resources = ResourceFactory.mountain();
+        }
+        else if(this.name === FieldEnum.PLAINS){
+            this.resources = ResourceFactory.plains();
+        }
     }
 
     static randomName() {
@@ -34,6 +36,18 @@ export class Field {
             name = FieldEnum.MOUNTAIN;
         }
         return name;
+    }
+
+    addBuidling(buidling){
+        this.buildings.push(buidling);
+    }
+
+    process(){
+        for(let i = 0; i < this.buildings.length; i ++){
+            if(this.buildings[i].enoughResources(this.resources, this.buildings[i].getRequired())){
+                this.resources = this.buildings.removeResources(this.buildings.getRequired());
+            }
+        }
     }
 
 }
