@@ -20,7 +20,7 @@
   "dependencies": {
     "esm": "^3.2.25",
     "express": "^4.17.1",
-    "socket.io": "^2.4.1"
+    "socket.io": "^2.5.0"
   },
   "devDependencies": {
     "@types/socket.io": "^3.0.2"
