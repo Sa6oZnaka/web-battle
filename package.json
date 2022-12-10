@@ -19,7 +19,7 @@
   "homepage": "https://github.com/Sa6oZnaka/web-battle#readme",
   "dependencies": {
     "esm": "^3.2.25",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "socket.io": "^2.4.1"
   },
   "devDependencies": {
